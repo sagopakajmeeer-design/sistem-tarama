@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Güncellemesi</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      font-family: 'Courier New', Courier, monospace;
+    }
+    canvas {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: none;
+    }
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+      background: #000;
+      color: #00ff00;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      text-shadow: 0 0 10px #00ff00;
+    }
+    .loader {
+      border: 4px solid #111;
+      border-top: 4px solid #00ff00;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .hidden {
+      display: none !important;
+    }
+    .warning-box {
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #ff3333;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 25px #ff3333;
+      max-width: 85%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Aşama: Tarama Ekranı -->
+  <div id="scanScreen" class="screen">
+    <div class="loader"></div>
+    <h1>TELEFON TARANIYOR...</h1>
+    <p id="statusText" style="color: #aaa; font-size: 14px;">Sistem dosyaları analiz ediliyor...</p>
+  </div>
+
+  <!-- Matrix Arka Planı için Canvas -->
+  <canvas id="matrix"></canvas>
+
+  <!-- 2. Aşama: Şaka Mesajı Ekranı -->
+  <div id="jokeScreen" class="screen hidden" style="background: transparent;">
+    <div class="warning-box">
+      <h2 style="color: #ff3333; margin-top:0;">⚠️ KRİTİK UYARI ⚠️</h2>
+      <p style="color: #fff;">Bilinmeyen bir erişim tespit edildi!</p>
+      <p style="color: #00ff00; font-weight: bold; font-size: 18px; margin: 20px 0;">YAKALANDIN! 😜</p>
+      <p style="font-size: 11px; color: #888;">(Bu tamamen zararsız bir şaka ekranıdır. Sekmeyi kapatabilirsin!)</p>
+    </div>
+  </div>
+
+  <script>
+    const scanScreen = document.getElementById('scanScreen');
+    const jokeScreen = document.getElementById('jokeScreen');
+    const canvas = document.getElementById('matrix');
+    const statusText = document.getElementById('statusText');
+
+    function goFullscreen() {
+      try {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen();
+        }
+      } catch (e) {}
+    }
+
+    // Tarama metinlerinin değişimi
+    setTimeout(() => {
+      statusText.innerText = "Güvenlik protokolleri denetleniyor...";
+    }, 2000);
+
+    setTimeout(() => {
+      statusText.innerText = "Bellek dökümü alınıyor...";
+    }, 4000);
+
+    // 6 saniye sonra Matrix ve final ekranına geçiş
+    setTimeout(() => {
+      goFullscreen();
+      scanScreen.classList.add('hidden');
+      canvas.style.display = 'block';
+      jokeScreen.classList.remove('hidden');
+      startMatrix();
+    }, 6000);
+
+    function startMatrix() {
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const chars = '0123456789ABCDEFHIKLMNOPQRSTUVXYZ_#@%';
+      const fontSize = 16;
+      const columns = canvas.width / fontSize;
+      const drops = Array(Math.floor(columns)).fill(1);
+
+      function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#00ff00';
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      }
+      setInterval(draw, 33);
+    }
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
