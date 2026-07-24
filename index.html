@@ -2,21 +2,21 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sistem Uyarısı</title>
   <style>
     * {
       box-sizing: border-box;
-    }
-    html, body {
       margin: 0;
       padding: 0;
-      width: 100vw;
-      height: 100vh;
-      height: -webkit-fill-available;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
       overflow: hidden;
-      background: black;
+      background: #000;
       font-family: 'Courier New', Courier, monospace;
+      position: fixed; /* Mobilde kaymaları önler */
     }
 
     canvas {
@@ -24,19 +24,17 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       z-index: 1;
     }
 
-    /* Glitch / Titreme Efekti */
     @keyframes glitch {
-      0% { transform: translate(0); }
-      20% { transform: translate(-3px, 3px); }
-      40% { transform: translate(-3px, -3px); }
-      60% { transform: translate(3px, 3px); }
-      80% { transform: translate(3px, -3px); }
-      100% { transform: translate(0); }
+      0% { transform: translate(-50%, -50%) translate(0, 0); }
+      25% { transform: translate(-50%, -50%) translate(-2px, 2px); }
+      50% { transform: translate(-50%, -50%) translate(2px, -2px); }
+      75% { transform: translate(-50%, -50%) translate(-2px, -2px); }
+      100% { transform: translate(-50%, -50%) translate(0, 0); }
     }
 
     .warning-box {
@@ -44,37 +42,37 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 2;
+      z-index: 10;
       background: rgba(10, 10, 10, 0.95);
       border: 2px solid #ff0000;
-      box-shadow: 0 0 25px #ff0000;
-      padding: 25px;
+      box-shadow: 0 0 20px #ff0000;
+      padding: 20px;
       border-radius: 12px;
       text-align: center;
-      width: 85%;
-      max-width: 380px;
+      width: 90%;
+      max-width: 340px;
       color: white;
-      animation: glitch 0.3s infinite alternate;
+      animation: glitch 0.2s infinite alternate;
     }
 
     .warning-title {
       color: #ff3333;
-      font-size: 22px;
+      font-size: 18px;
       font-weight: bold;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       text-shadow: 0 0 8px #ff0000;
     }
 
     .warning-text {
-      font-size: 14px;
-      line-height: 1.5;
+      font-size: 13px;
+      line-height: 1.4;
       margin-bottom: 15px;
       color: #dddddd;
     }
 
     .timer-container {
       color: #ffcc00;
-      font-size: 18px;
+      font-size: 15px;
       font-weight: bold;
       background: rgba(255, 0, 0, 0.2);
       padding: 10px;
@@ -82,12 +80,22 @@
       border: 1px dashed #ff3333;
     }
 
-    .joke-reveal {
+    #joke-content {
       display: none;
+    }
+
+    .joke-title {
       color: #00ff00;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: bold;
       text-shadow: 0 0 10px #00ff00;
+      margin-bottom: 15px;
+    }
+
+    .joke-text {
+      font-size: 14px;
+      color: #ffffff;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -96,28 +104,30 @@
   <canvas id="matrix"></canvas>
 
   <div class="warning-box">
+    <!-- 1. Aşama: Korkutucu Ekran -->
     <div id="scary-content">
       <div class="warning-title">⚠️ KRİTİK SİSTEM HATASI ⚠️</div>
       <div class="warning-text">
         Cihazınıza izinsiz erişim sağlandı.<br>
-        Tüm kişisel verileriniz siliniyor!
+        Tüm verileriniz siliniyor!
       </div>
       <div class="timer-container">
-        Sistemin Sıfırlanmasına: <br>
-        <span id="timer" style="font-size: 32px; color: #ff0000;">10</span> saniye
+        Sistemin Sıfırlanmasına:<br>
+        <span id="timer" style="font-size: 30px; color: #ff0000;">10</span> saniye
       </div>
     </div>
 
-    <div id="joke-content" class="joke-reveal">
-      YAKALANDIN! 😜<br><br>
-      <span style="font-size: 16px; color: #ffffff;">
+    <!-- 2. Aşama: Şaka Açıklaması -->
+    <div id="joke-content">
+      <div class="joke-title">YAKALANDIN! 😜</div>
+      <div class="joke-text">
         Telefonuna hiçbir şey olmadı, tamamen şakaydı! ❤️
-      </span>
+      </div>
     </div>
   </div>
 
   <script>
-    // Matrix Yağmuru Efekti
+    // Matrix Efekti
     const canvas = document.getElementById('matrix');
     const ctx = canvas.getContext('2d');
 
@@ -128,13 +138,10 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
-    const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*';
-    const alphabet = katakana + latin;
-
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*';
     const fontSize = 16;
     let columns = Math.floor(canvas.width / fontSize);
-    let rainDrops = Array(columns).fill(1);
+    let drops = Array(columns).fill(1);
 
     function drawMatrix() {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
@@ -143,20 +150,19 @@
       ctx.fillStyle = '#0F0';
       ctx.font = fontSize + 'px monospace';
 
-      for (let i = 0; i < rainDrops.length; i++) {
-        const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-        ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars.charAt(Math.floor(Math.random() * chars.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-        if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          rainDrops[i] = 0;
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
         }
-        rainDrops[i]++;
+        drops[i]++;
       }
     }
+    setInterval(drawMatrix, 33);
 
-    setInterval(drawMatrix, 30);
-
-    // Geri Sayım ve Şaka Mantığı
+    // Geri Sayım Mantığı
     let timeLeft = 10;
     const timerElement = document.getElementById('timer');
     const scaryContent = document.getElementById('scary-content');
@@ -164,17 +170,17 @@
 
     const countdown = setInterval(() => {
       timeLeft--;
-      if (timerElement) timerElement.innerText = timeLeft;
+      if (timerElement) {
+        timerElement.innerText = timeLeft;
+      }
 
       if (timeLeft <= 0) {
         clearInterval(countdown);
         
-        // Cihaz destekliyorsa hafif titreşim ver
         if (navigator.vibrate) {
-          navigator.vibrate([200, 100, 200, 100, 400]);
+          navigator.vibrate([200, 100, 200]);
         }
 
-        // Korkunç metni gizle, şaka metnini göster
         scaryContent.style.display = 'none';
         jokeContent.style.display = 'block';
       }
