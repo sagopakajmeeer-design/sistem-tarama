@@ -34,15 +34,35 @@
             75% { transform: translate(-50%, -50%) translate(-1px, -1px); }
             100% { transform: translate(-50%, -50%) translate(0); }
         }
-        /* Jumpscare Sallantı Efekti */
-        @keyframes jumpscare-shake {
-            0% { transform: scale(1.2) translate(0, 0); }
-            20% { transform: scale(1.4) translate(-10px, 10px); }
-            40% { transform: scale(1.3) translate(10px, -10px); }
-            60% { transform: scale(1.5) translate(-15px, -5px); }
-            80% { transform: scale(1.4) translate(15px, 5px); }
-            100% { transform: scale(1) translate(0, 0); }
+        
+        /* Tam Ekran Jumpscare Katmanı */
+        #fullscreen-jumpscare {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: #000;
         }
+        #fullscreen-jumpscare img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: shake 0.1s infinite;
+        }
+
+        /* Ekran Sallantısı */
+        @keyframes shake {
+            0% { transform: translate(0, 0) scale(1.05); }
+            20% { transform: translate(-15px, 15px) scale(1.1); }
+            40% { transform: translate(15px, -15px) scale(1.08); }
+            60% { transform: translate(-10px, -10px) scale(1.12); }
+            80% { transform: translate(10px, 10px) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
         .warning-box {
             position: absolute;
             top: 50%;
@@ -103,10 +123,7 @@
             height: auto;
             margin-top: 15px;
             border-radius: 8px;
-            border: 2px solid #ff0000;
-        }
-        .jumpscare-anim {
-            animation: jumpscare-shake 0.5s ease-in-out;
+            border: 1px solid #00ff00;
         }
     </style>
 </head>
@@ -114,8 +131,13 @@
 
     <canvas id="matrix"></canvas>
 
-    <!-- Ses Dosyası (GitHub'a yüklediğin mp3 ismiyle aynı olmalı) -->
+    <!-- Ses Dosyası -->
     <audio id="screamSound" src="ciglik.mp3" preload="auto"></audio>
+
+    <!-- Tam Ekran Jumpscare Görseli -->
+    <div id="fullscreen-jumpscare">
+        <img src="f50fb156e606ef622e4d6f1bbe63e4bf.jpg" alt="Jumpscare">
+    </div>
 
     <div class="warning-box" id="warningBox">
         <!-- 1. Aşama: Korkutucu Uyarı -->
@@ -131,15 +153,13 @@
             </div>
         </div>
 
-        <!-- 2. Aşama: Jumpscare & Şaka Ekranı -->
+        <!-- 2. Aşama: Şaka Ekranı (Jumpscare sonrası görünecek) -->
         <div id="joke-content">
-            <div class="joke-title" style="color: #ff0000;">YAKALANDIN! 😱</div>
+            <div class="joke-title">YAKALANDIN! 😜</div>
             <div class="joke-text">
                 Telefonuna hiçbir şey olmadı, tamamen şakaydı! ❤️
             </div>
-            
-            <!-- Resim dosyanın adı -->
-            <img src="f50fb156e606ef622e4d6f1bbe63e4bf.jpg" alt="Jumpscare" class="joke-image">
+            <img src="f50fb156e606ef622e4d6f1bbe63e4bf.jpg" alt="Şaka Görseli" class="joke-image">
         </div>
     </div>
 
@@ -187,12 +207,12 @@
         }
         setInterval(drawMatrix, 33);
 
-        // Geri Sayım ve Jumpscare Mantığı
+        // Geri Sayım ve Tam Ekran Jumpscare
         let timeLeft = 10;
         const timerElement = document.getElementById('timer');
         const scaryContent = document.getElementById('scary-content');
         const jokeContent = document.getElementById('joke-content');
-        const warningBox = document.getElementById('warningBox');
+        const jumpscareOverlay = document.getElementById('fullscreen-jumpscare');
         const screamSound = document.getElementById('screamSound');
 
         const countdown = setInterval(() => {
@@ -204,20 +224,25 @@
             if (timeLeft <= 0) {
                 clearInterval(countdown);
                 
-                // Çığlık sesini çal
+                // 1. Çığlık Sesini Çal
                 if (screamSound) {
-                    screamSound.play().catch(e => console.log("Ses çalma izni gerekiyor:", e));
+                    screamSound.play().catch(e => console.log("Ses çalınamadı:", e));
                 }
 
-                // Güçlü Titreşim
+                // 2. Güçlü Titreşim Yap
                 if (navigator.vibrate) {
-                    navigator.vibrate([500, 100, 500, 100, 500]);
+                    navigator.vibrate([1000, 100, 1000]);
                 }
 
-                // Ekranları değiştir ve Jumpscare efektini başlat
-                scaryContent.style.display = 'none';
-                jokeContent.style.display = 'block';
-                warningBox.classList.add('jumpscare-anim');
+                // 3. Tam Ekran Jumpscare Görselini Aç
+                jumpscareOverlay.style.display = 'block';
+
+                // 4. 2.5 Saniye Sonra Jumpscare'i Kapat ve Şaka Ekranını Göster
+                setTimeout(() => {
+                    jumpscareOverlay.style.display = 'none';
+                    scaryContent.style.display = 'none';
+                    jokeContent.style.display = 'block';
+                }, 2500);
             }
         }, 1000);
     </script>
