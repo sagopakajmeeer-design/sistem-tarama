@@ -50,16 +50,16 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            animation: shake 0.1s infinite;
+            animation: shake 0.08s infinite;
         }
 
-        /* Ekran Sallantısı */
+        /* Korkunç Ekran Sallantısı */
         @keyframes shake {
             0% { transform: translate(0, 0) scale(1.05); }
-            20% { transform: translate(-15px, 15px) scale(1.1); }
-            40% { transform: translate(15px, -15px) scale(1.08); }
-            60% { transform: translate(-10px, -10px) scale(1.12); }
-            80% { transform: translate(10px, 10px) scale(1.05); }
+            20% { transform: translate(-20px, 20px) scale(1.15); }
+            40% { transform: translate(20px, -20px) scale(1.1); }
+            60% { transform: translate(-15px, -15px) scale(1.18); }
+            80% { transform: translate(15px, 15px) scale(1.08); }
             100% { transform: translate(0, 0) scale(1); }
         }
 
@@ -131,7 +131,7 @@
 
     <canvas id="matrix"></canvas>
 
-    <!-- Ses Dosyası -->
+    <!-- Çığlık Sesi -->
     <audio id="screamSound" src="ciglik.mp3" preload="auto"></audio>
 
     <!-- Tam Ekran Jumpscare Görseli -->
@@ -153,9 +153,9 @@
             </div>
         </div>
 
-        <!-- 2. Aşama: Şaka Ekranı (Jumpscare sonrası görünecek) -->
+        <!-- 2. Aşama: Şaka Ekranı (4 saniyelik jumpscare'den sonra açılacak) -->
         <div id="joke-content">
-            <div class="joke-title">YAKALANDIN! 😜</div>
+            <div class="joke-title">YAKALANDIN! 😱</div>
             <div class="joke-text">
                 Telefonuna hiçbir şey olmadı, tamamen şakaydı! ❤️
             </div>
@@ -207,7 +207,7 @@
         }
         setInterval(drawMatrix, 33);
 
-        // Geri Sayım ve Tam Ekran Jumpscare
+        // Geri Sayım ve 4 Saniyelik Tam Ekran Jumpscare
         let timeLeft = 10;
         const timerElement = document.getElementById('timer');
         const scaryContent = document.getElementById('scary-content');
@@ -231,18 +231,18 @@
 
                 // 2. Güçlü Titreşim Yap
                 if (navigator.vibrate) {
-                    navigator.vibrate([1000, 100, 1000]);
+                    navigator.vibrate([1000, 200, 1000, 200, 1000]);
                 }
 
                 // 3. Tam Ekran Jumpscare Görselini Aç
                 jumpscareOverlay.style.display = 'block';
 
-                // 4. 2.5 Saniye Sonra Jumpscare'i Kapat ve Şaka Ekranını Göster
+                // 4. Tam 4 Saniye (4000 ms) Sonra Jumpscare'i Kapat ve Şaka Mesajını Göster
                 setTimeout(() => {
                     jumpscareOverlay.style.display = 'none';
                     scaryContent.style.display = 'none';
                     jokeContent.style.display = 'block';
-                }, 2500);
+                }, 4000);
             }
         }, 1000);
     </script>
