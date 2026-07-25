@@ -37,7 +37,6 @@
         .file-status { font-size: 10px; color: #00ff00; height: 15px; overflow: hidden; white-space: nowrap; margin-bottom: 10px; text-align: left; opacity: 0.8; }
         .timer-container { color: #ffcc00; font-size: 14px; font-weight: bold; background: rgba(255, 0, 0, 0.2); padding: 8px; border-radius: 6px; border: 1px dashed #ff3333; }
 
-        /* 1. Özellik: Kamera / Fotoğraf Çekilme Uyarısı */
         .cam-alert {
             display: none;
             color: #ff0000;
@@ -49,7 +48,6 @@
             font-weight: bold;
         }
 
-        /* 4. Özellik: Ekranda Açılan Sahte Hata Pencereleri */
         .popup-error {
             position: absolute;
             background: #d4d0c8;
@@ -100,7 +98,6 @@
     </div>
 
     <div class="warning-box" id="warningBox">
-        <!-- 1. Aşama: Geri Sayım ve Simülasyon -->
         <div id="scary-content">
             <div class="warning-title">🚨 KRİTİK GÜVENLİK İHLALİ 🚨</div>
             <div class="warning-text">Cihaz belleği biçimlendiriliyor.<br>Lütfen telefonu kapatmayın!</div>
@@ -108,13 +105,11 @@
             <div style="font-size: 11px; color: #ffcc00; margin-bottom: 5px;">Siliniyor: <span id="percentText">0%</span></div>
             <div class="file-status" id="fileStatus">> /system/root_access...</div>
             
-            <!-- Sahte Kamera Uyarısı -->
             <div class="cam-alert" id="camAlert">📸 Ön Kamera Aktif: Fotoğraf Sunucuya Gönderiliyor...</div>
 
             <div class="timer-container" style="margin-top: 10px;">Tam Sıfırlamaya:<br><span id="timer" style="font-size: 22px; color: #ff0000;">10</span> saniye</div>
         </div>
 
-        <!-- 2. Aşama: Şaka Mesajı -->
         <div id="joke-content">
             <div class="joke-title">YAKALANDIN! 😱</div>
             <div class="joke-text">
@@ -144,7 +139,6 @@
             }
         }
 
-        // Matrix Yağmuru
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
@@ -171,7 +165,6 @@
         }
         setInterval(drawMatrix, 33);
 
-        // Sahte Hata Pencereleri Oluşturan Fonksiyon
         function createErrorPopup(msg) {
             const popup = document.createElement('div');
             popup.className = 'popup-error';
@@ -186,7 +179,6 @@
             document.body.appendChild(popup);
         }
 
-        // Geri Sayım Mantığı
         let timeLeft = 10;
         let progress = 0;
         const fakeFiles = [
@@ -205,28 +197,23 @@
             document.getElementById('fileStatus').innerText = fakeFiles[Math.floor(Math.random() * fakeFiles.length)];
             document.getElementById('timer').innerText = timeLeft;
 
-            // 5. ve 2. saniyelerde ekranda sahte pop-up hata penceresi çıksın
             if (timeLeft === 7) createErrorPopup("Kritik Bellek Doldu!");
             if (timeLeft === 4) createErrorPopup("System32/boot.ini Silindi!");
 
-            // Son 4 saniyede Sahte Kamera Yazısı Çıksın
             if (timeLeft <= 4 && timeLeft > 0) {
                 document.getElementById('camAlert').style.display = 'block';
             }
 
-            // Son 3 saniye flaş ve titreşim
             if (timeLeft <= 3 && timeLeft > 0) {
                 if (navigator.vibrate) navigator.vibrate(200);
                 setFlashState(true);
                 setTimeout(() => setFlashState(false), 100);
             }
 
-            // Süre bittiğinde jumpscare başlasın
             if (timeLeft <= 0) {
                 clearInterval(countdown);
                 if (navigator.vibrate) navigator.vibrate([1000, 100, 1000]);
 
-                // Açılan sahte popup'ları temizle
                 document.querySelectorAll('.popup-error').forEach(e => e.remove());
 
                 const overlay = document.getElementById('fullscreen-jumpscare');
