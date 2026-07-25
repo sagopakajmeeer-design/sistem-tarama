@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Cyber Runner</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #08020a;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            touch-action: none;
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            height: 100%;
+            max-height: 800px;
+            background: linear-gradient(to bottom, #110022, #000000);
+            box-shadow: 0 0 30px rgba(255, 0, 128, 0.4);
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc;
+            pointer-events: none;
+        }
+        #start-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 2, 20, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 10;
+        }
+        h1 {
+            font-size: 32px;
+            color: #ff007f;
+            text-shadow: 0 0 15px #ff007f;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        p {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .btn {
+            background: linear-gradient(45deg, #ff007f, #7f00ff);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 0, 128, 0.6);
+            transition: 0.2s;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div class="ui-layer">
+            <div>SKOR: <span id="scoreVal">0</span></div>
+            <div>YÜKSEK: <span id="highScoreVal">0</span></div>
+        </div>
+
+        <div id="start-screen">
+            <h1>NEON RUNNER</h1>
+            <p>Parıldayan engellerden kaç, enerji küplerini topla!</p>
+            <button class="btn" onclick="startGame()">BAŞLAT</button>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        let gameStarted = false;
+        let score = 0;
+        let highScore = localStorage.getItem('neonHighScore') || 0;
+        document.getElementById('highScoreVal').innerText = highScore;
+
+        // Oyuncu (Gemimiz)
+        let player = {
+            x: canvas.width / 2,
+            y: canvas.height - 120,
+            radius: 18,
+            color: '#00ffcc',
+            targetX: canvas.width / 2
+        };
+
+        let obstacles = [];
+        let particles = [];
+        let frameCount = 0;
+
+        // Dokunma / Fare Kontrolü
+        window.addEventListener('mousemove', (e) => {
+            if (!gameStarted) return;
+            const rect = canvas.getBoundingClientRect();
+            player.targetX = e.clientX - rect.left;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!gameStarted) return;
+            const rect = canvas.getBoundingClientRect();
+            player.targetX = e.touches[0].clientX - rect.left;
+        }, { passive: true });
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            gameStarted = true;
+            score = 0;
+            obstacles = [];
+            particles = [];
+            player.x = canvas.width / 2;
+            player.targetX = canvas.width / 2;
+            loop();
+        }
+
+        // Parçacık Efekti (Arka plan ve patlama için)
+        function createParticle(x, y, color) {
+            particles.push({
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                radius: Math.random() * 3 + 1,
+                color: color,
+                alpha: 1
+            });
+        }
+
+        function loop() {
+            if (!gameStarted) return;
+
+            // Arka planı temizle (Hafif iz bırakma efekti için yarı şeffaf siyah)
+            ctx.fillStyle = 'rgba(10, 2, 20, 0.3)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Oyuncuyu hedefe yumuşak kaydır
+            player.x += (player.targetX - player.x) * 0.1;
+            // Sınırda tut
+            if (player.x < player.radius) player.x = player.radius;
+            if (player.x > canvas.width - player.radius) player.x = canvas.width - player.radius;
+
+            // Oyuncu Çizimi (Neon Parlama)
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = player.color;
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Motor İzi Parçacıkları
+            createParticle(player.x + (Math.random() - 0.5) * 10, player.y + player.radius, '#ff007f');
+
+            // Engelleri Üret
+            frameCount++;
+            if (frameCount % 45 === 0) {
+                let size = Math.random() * 30 + 20;
+                obstacles.push({
+                    x: Math.random() * (canvas.width - size),
+                    y: -50,
+                    width: size,
+                    height: size,
+                    speed: Math.random() * 4 + 4,
+                    color: Math.random() > 0.5 ? '#ff0055' : '#7f00ff'
+                });
+            }
+
+            // Engelleri Hareket Ettir ve Çiz
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let obs = obstacles[i];
+                obs.y += obs.speed;
+
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = obs.color;
+                ctx.fillStyle = obs.color;
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+
+                // Çarpışma Kontrolü (AABB)
+                if (
+                    player.x + player.radius > obs.x &&
+                    player.x - player.radius < obs.x + obs.width &&
+                    player.y + player.radius > obs.y &&
+                    player.y - player.radius < obs.y + obs.height
+                ) {
+                    // Oyun Bitti
+                    gameStarted = false;
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('neonHighScore', highScore);
+                        document.getElementById('highScoreVal').innerText = highScore;
+                    }
+                    document.getElementById('start-screen').style.display = 'flex';
+                    document.querySelector('#start-screen h1').innerText = ' OYUN BİTTİ ';
+                    document.querySelector('#start-screen p').innerText = 'Skorun: ' + score;
+                    document.querySelector('.btn').innerText = 'TEKRAR OYNA';
+                    return;
+                }
+
+                // Ekrandan çıkan engelleri sil ve puan ver
+                if (obs.y > canvas.height) {
+                    obstacles.splice(i, 1);
+                    score += 10;
+                    document.getElementById('scoreVal').innerText = score;
+                }
+            }
+
+            // Parçacıkları Güncelle
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= 0.03;
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = p.color;
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
+
+            requestAnimationFrame(loop);
+        }
+    </script>
+</body>
+</html>
