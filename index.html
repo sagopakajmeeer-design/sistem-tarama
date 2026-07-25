@@ -35,7 +35,7 @@
             100% { box-shadow: 0 0 10px #ff0000; border-color: #ff0000; }
         }
 
-        /* Ekran Beyaz Flaş Çakma Efekti */
+        /* Ekran Flaş Çakma Efekti */
         #screen-flash {
             display: none;
             position: fixed;
@@ -150,12 +150,12 @@
             line-height: 1.5;
         }
         
-        /* BEYAZLARI SİYAH YAPAN RESİM KUTUSU */
+        /* DÜZELTİLEN RESİM ALANI */
         .joke-image-container {
             background-color: #000000;
             border-radius: 8px;
             border: 2px solid #00ff00;
-            padding: 10px;
+            padding: 5px;
             margin-top: 15px;
             display: inline-block;
             width: 100%;
@@ -167,10 +167,7 @@
             width: 100%;
             height: auto;
             display: block;
-            background-color: #000;
-            /* Resimdeki beyaz alanları siyah yapan CSS filtreleri */
-            mix-blend-mode: multiply;
-            filter: grayscale(100%) contrast(200%) invert(0%);
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -227,7 +224,7 @@
     </div>
 
     <script>
-        // 1. Kamera Feneri (Flaş) Donanım Kontrolü
+        // Kamera Feneri (Flaş) Donanım Kontrolü
         let videoTrack = null;
         async function initCameraFlash() {
             try {
@@ -266,7 +263,7 @@
             }, durationMs);
         }
 
-        // 2. Matrix Yağmuru Efekti
+        // Matrix Yağmuru Efekti
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
 
@@ -309,7 +306,7 @@
         }
         setInterval(drawMatrix, 33);
 
-        // 3. Sahte Dosya İsimleri
+        // Sahte Dosya İsimleri
         const fakeFiles = [
             "> DCIM/Camera/IMG_2026.jpg silindi",
             "> WhatsApp/Databases/msgstore.db silindi",
