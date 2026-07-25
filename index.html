@@ -9,81 +9,80 @@
         html, body {
             width: 100%; height: 100%; overflow: hidden;
             background: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; position: fixed;
+            transition: transform 0.1s ease;
         }
         canvas { display: block; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
         
         @keyframes red-alert {
-            0% { box-shadow: 0 0 10px #ff0000; border-color: #ff0000; }
-            50% { box-shadow: 0 0 35px #ff0000; border-color: #ffffff; background: rgba(30, 0, 0, 0.98); }
-            100% { box-shadow: 0 0 10px #ff0000; border-color: #ff0000; }
+            0% { box-shadow: 0 0 15px #ff0000; border-color: #ff0000; }
+            50% { box-shadow: 0 0 50px #ff0000; border-color: #ffffff; background: rgba(50, 0, 0, 0.98); }
+            100% { box-shadow: 0 0 15px #ff0000; border-color: #ff0000; }
         }
 
         .warning-box {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%); z-index: 10;
-            background: rgba(10, 10, 10, 0.98); border: 2px solid #ff0000;
+            background: rgba(10, 10, 10, 0.98); border: 3px solid #ff0000;
             padding: 20px; border-radius: 16px; text-align: center;
             width: 90%; max-width: 350px; color: white;
-            animation: red-alert 0.5s infinite;
+            animation: red-alert 0.3s infinite;
         }
-        .warning-title { color: #ff3333; font-size: 17px; font-weight: bold; margin-bottom: 8px; }
-        .warning-text { font-size: 12px; line-height: 1.3; margin-bottom: 10px; color: #dddddd; }
+        .warning-title { color: #ff1a1a; font-size: 18px; font-weight: bold; margin-bottom: 8px; text-shadow: 0 0 10px #ff0000; }
+        .warning-text { font-size: 12px; line-height: 1.3; margin-bottom: 10px; color: #ffdddd; }
 
         .progress-container {
             width: 100%; background-color: #111; border-radius: 5px;
             border: 1px solid #ff3333; margin: 10px 0 5px 0; overflow: hidden;
         }
-        .progress-bar { width: 0%; height: 12px; background: linear-gradient(90deg, #ff9900, #ff0000); transition: width 0.3s; }
-        .file-status { font-size: 10px; color: #00ff00; height: 15px; overflow: hidden; white-space: nowrap; margin-bottom: 10px; text-align: left; opacity: 0.8; font-family: monospace; }
-        .timer-container { color: #ffcc00; font-size: 14px; font-weight: bold; background: rgba(255, 0, 0, 0.2); padding: 8px; border-radius: 8px; border: 1px dashed #ff3333; }
+        .progress-bar { width: 0%; height: 12px; background: linear-gradient(90deg, #ff0000, #990000); transition: width 0.3s; }
+        .file-status { font-size: 10px; color: #00ff00; height: 15px; overflow: hidden; white-space: nowrap; margin-bottom: 10px; text-align: left; opacity: 0.9; font-family: monospace; }
+        .timer-container { color: #ffcc00; font-size: 14px; font-weight: bold; background: rgba(255, 0, 0, 0.3); padding: 8px; border-radius: 8px; border: 1px dashed #ff3333; }
 
         .cam-alert {
             display: none;
-            color: #ff3333;
-            background: #1a0000;
-            border: 1px solid #ff0000;
+            color: #ffffff;
+            background: #ff0000;
+            border: 1px solid #ffffff;
             padding: 6px;
             font-size: 11px;
             margin-top: 8px;
             border-radius: 6px;
             font-weight: bold;
+            animation: red-alert 0.2s infinite;
         }
 
-        /* Android Material Design Tarzı Sistem Diyalog Kutusu */
         .android-dialog {
             position: absolute;
-            background: #212121;
-            border: 1px solid #333333;
+            background: #1c1c1e;
+            border: 1px solid #ff3333;
             border-radius: 20px;
             padding: 18px;
             color: #ffffff;
             z-index: 20;
-            box-shadow: 0px 8px 24px rgba(0,0,0,0.8);
-            width: 260px;
+            box-shadow: 0px 10px 30px rgba(255,0,0,0.4);
+            width: 270px;
         }
         .android-dialog-title {
-            color: #ff5252;
+            color: #ff3b30;
             font-size: 15px;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
         .android-dialog-body {
-            color: #cccccc;
+            color: #e5e5ea;
             font-size: 12px;
             line-height: 1.4;
             margin-bottom: 14px;
         }
         .android-dialog-btn {
-            background: transparent;
-            color: #00e676;
+            background: #ff3b30;
+            color: white;
             border: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             float: right;
-            padding: 4px 8px;
+            padding: 6px 14px;
+            border-radius: 8px;
             cursor: pointer;
             text-transform: uppercase;
         }
@@ -116,15 +115,15 @@
 
     <div class="warning-box" id="warningBox">
         <div id="scary-content">
-            <div class="warning-title">🚨 KRİTİK GÜVENLİK İHLALİ 🚨</div>
-            <div class="warning-text">Cihaz belleği biçimlendiriliyor.<br>Lütfen telefonu kapatmayın!</div>
+            <div class="warning-title">⚠️ KÖKLÜ SİSTEM İHLALİ ⚠️</div>
+            <div class="warning-text">Tüm veriler şifreleniyor ve dış sunucuya aktarılıyor!</div>
             <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
-            <div style="font-size: 11px; color: #ffcc00; margin-bottom: 5px;">Siliniyor: <span id="percentText">0%</span></div>
-            <div class="file-status" id="fileStatus">> /system/root_access...</div>
+            <div style="font-size: 11px; color: #ffcc00; margin-bottom: 5px;">İşlem: <span id="percentText">0%</span></div>
+            <div class="file-status" id="fileStatus">> /system/override_root...</div>
             
-            <div class="cam-alert" id="camAlert">📸 Ön Kamera Aktif: Fotoğraf Sunucuya Gönderiliyor...</div>
+            <div class="cam-alert" id="camAlert">🚨 ÖN KAMERA KAYDI AKTİF & YÜKLENİYOR 🚨</div>
 
-            <div class="timer-container" style="margin-top: 10px;">Tam Sıfırlamaya:<br><span id="timer" style="font-size: 22px; color: #ff0000;">10</span> saniye</div>
+            <div class="timer-container" style="margin-top: 10px;">Sistemin Kilitlenmesine:<br><span id="timer" style="font-size: 24px; color: #ff0000;">10</span> saniye</div>
         </div>
 
         <div id="joke-content">
@@ -162,15 +161,15 @@
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const chars = '01ABCDEFXYZ#@$%&*';
         const fontSize = 14;
         let columns = Math.floor(canvas.width / fontSize);
         let drops = Array(columns).fill(1);
 
         function drawMatrix() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#0F0';
+            ctx.fillStyle = '#ff0000';
             ctx.font = fontSize + 'px monospace';
 
             for (let i = 0; i < drops.length; i++) {
@@ -180,19 +179,18 @@
                 drops[i]++;
             }
         }
-        setInterval(drawMatrix, 33);
+        setInterval(drawMatrix, 30);
 
-        // Android Sistem Tarzı Pop-up Oluşturma
         function createAndroidDialog(title, bodyMsg) {
             const popup = document.createElement('div');
             popup.className = 'android-dialog';
-            popup.style.top = (Math.random() * (window.innerHeight - 160) + 20) + 'px';
-            popup.style.left = (Math.random() * (window.innerWidth - 280) + 10) + 'px';
+            popup.style.top = (Math.random() * (window.innerHeight - 180) + 10) + 'px';
+            popup.style.left = (Math.random() * (window.innerWidth - 290) + 10) + 'px';
             
             popup.innerHTML = `
-                <div class="android-dialog-title">⚠️ ${title}</div>
+                <div class="android-dialog-title">🚨 ${title}</div>
                 <div class="android-dialog-body">${bodyMsg}</div>
-                <button class="android-dialog-btn" onclick="this.parentElement.remove()">TAMAM</button>
+                <button class="android-dialog-btn" onclick="this.parentElement.remove()">KAPAT</button>
             `;
             document.body.appendChild(popup);
         }
@@ -200,9 +198,10 @@
         let timeLeft = 10;
         let progress = 0;
         const fakeFiles = [
-            "> DCIM/Camera/IMG_2026.jpg silindi", 
-            "> WhatsApp/Databases/msgstore.db silindi", 
-            "> System/Contacts.vcf silindi"
+            "> BANKA HESAPLARI KOPYALANIYOR...", 
+            "> TÜM FOTOĞRAFLAR BULUTA AKTARILIYOR...", 
+            "> KİŞİSEL VERİLER SİLİNİYOR...",
+            "> GEÇMİŞ VE ŞİFRELER ÇALINIYOR..."
         ];
 
         const countdown = setInterval(() => {
@@ -215,23 +214,28 @@
             document.getElementById('fileStatus').innerText = fakeFiles[Math.floor(Math.random() * fakeFiles.length)];
             document.getElementById('timer').innerText = timeLeft;
 
-            // Android Tarzı Uyarı Pop-up'ları
-            if (timeLeft === 7) createAndroidDialog("Android Sistem Uyarısı", "Android AÇIK/KAPALI çekirdeği yanıt vermiyor. Depolama alanı siliniyor.");
-            if (timeLeft === 4) createAndroidDialog("Güvenlik İhlali", "Bilinmeyen kaynaklardan gelen komut dosya erişimi engellenemedi.");
+            // Panik Artırıcı Ekstra Pop-up'lar
+            if (timeLeft === 8) createAndroidDialog("Root Yetkisi Alındı", "Cihazınızın ana dizinine sızıldı. Güvenlik duvarı devre dışı bırakıldı.");
+            if (timeLeft === 5) createAndroidDialog("Kritik Hata", "Telefon kapatma tuşları devre dışı bırakıldı. İşlem iptal edilemiyor!");
 
-            if (timeLeft <= 4 && timeLeft > 0) {
+            // Son 5 saniyede ekran hafifçe sarsılsın
+            if (timeLeft <= 5 && timeLeft > 0) {
                 document.getElementById('camAlert').style.display = 'block';
+                document.body.style.transform = `translate(${(Math.random()-0.5)*10}px, ${(Math.random()-0.5)*10}px)`;
             }
 
+            // Son 3 saniyede vahşi flaş ve titreşim bombardımanı
             if (timeLeft <= 3 && timeLeft > 0) {
-                if (navigator.vibrate) navigator.vibrate(200);
+                if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
                 setFlashState(true);
-                setTimeout(() => setFlashState(false), 100);
+                setTimeout(() => setFlashState(false), 150);
             }
 
+            // Süre bittiğinde korkunç video patlasın
             if (timeLeft <= 0) {
                 clearInterval(countdown);
-                if (navigator.vibrate) navigator.vibrate([1000, 100, 1000]);
+                document.body.style.transform = 'none';
+                if (navigator.vibrate) navigator.vibrate([1500, 200, 1500, 200, 2000]);
 
                 document.querySelectorAll('.android-dialog').forEach(e => e.remove());
 
