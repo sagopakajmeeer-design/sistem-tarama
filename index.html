@@ -28,11 +28,24 @@
             z-index: 1;
         }
         
-        /* Yanıp Sönen Kırmızı Alarm Efekti */
+        /* Yanıp Sönen Kırmızı Alarm */
         @keyframes red-alert {
             0% { box-shadow: 0 0 10px #ff0000; border-color: #ff0000; }
-            50% { box-shadow: 0 0 35px #ff0000; border-color: #ffffff; background: rgba(20, 0, 0, 0.95); }
+            50% { box-shadow: 0 0 35px #ff0000; border-color: #ffffff; background: rgba(30, 0, 0, 0.98); }
             100% { box-shadow: 0 0 10px #ff0000; border-color: #ff0000; }
+        }
+
+        /* Ekran Beyaz Flaş Çakma Efekti */
+        #screen-flash {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #ffffff;
+            z-index: 10000;
+            pointer-events: none;
         }
 
         .warning-box {
@@ -137,25 +150,27 @@
             line-height: 1.5;
         }
         
-        /* BEYAZ ALANLARI KAPATAN RESİM STİLİ */
+        /* BEYAZLARI SİYAH YAPAN RESİM KUTUSU */
         .joke-image-container {
             background-color: #000000;
             border-radius: 8px;
             border: 2px solid #00ff00;
-            padding: 5px;
+            padding: 10px;
             margin-top: 15px;
             display: inline-block;
             width: 100%;
             max-width: 250px;
             overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
         }
         .joke-image {
             width: 100%;
             height: auto;
             display: block;
             background-color: #000;
-            mix-blend-mode: multiply; /* Resimdeki beyaz alanları şeffaflaştırır/siyahlaştırır */
-            filter: contrast(120%);
+            /* Resimdeki beyaz alanları siyah yapan CSS filtreleri */
+            mix-blend-mode: multiply;
+            filter: grayscale(100%) contrast(200%) invert(0%);
         }
     </style>
 </head>
@@ -163,6 +178,10 @@
 
     <canvas id="matrix"></canvas>
 
+    <!-- Flaş Çakma Efekti Katmanı -->
+    <div id="screen-flash"></div>
+
+    <!-- Tam Ekran Jumpscare Video Elementi -->
     <div id="fullscreen-jumpscare">
         <video id="jumpscareVideo" preload="auto">
             <source src="korku.mp4" type="video/mp4">
@@ -170,6 +189,7 @@
     </div>
 
     <div class="warning-box" id="warningBox">
+        <!-- 1. Aşama: Korkutucu Uyarı & Simülasyon -->
         <div id="scary-content">
             <div class="warning-title">🚨 KRİTİK GÜVENLİK İHLALİ 🚨</div>
             <div class="warning-text">
@@ -177,6 +197,7 @@
                 Lütfen telefonu kapatmayın!
             </div>
 
+            <!-- İlerleme Çubuğu ve Yüzde -->
             <div class="progress-container">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
@@ -184,6 +205,7 @@
                 Siliniyor: <span id="percentText">0%</span>
             </div>
 
+            <!-- Akan Dosya Yazısı -->
             <div class="file-status" id="fileStatus">> /system/root_access...</div>
 
             <div class="timer-container">
@@ -192,6 +214,7 @@
             </div>
         </div>
 
+        <!-- 2. Aşama: Şaka Ekranı -->
         <div id="joke-content">
             <div class="joke-title">YAKALANDIN! 😱</div>
             <div class="joke-text">
@@ -204,42 +227,46 @@
     </div>
 
     <script>
-        // Fener / Flaş Kontrol Modülü
-        let track = null;
-        async function initFlashlight() {
+        // 1. Kamera Feneri (Flaş) Donanım Kontrolü
+        let videoTrack = null;
+        async function initCameraFlash() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: 'environment' }
                 });
-                track = stream.getVideoTracks()[0];
+                videoTrack = stream.getVideoTracks()[0];
             } catch (e) {
-                console.log("Flaş izni veya desteği yok:", e);
+                console.log("Flaş erişimi sağlanamadı:", e);
             }
         }
-        initFlashlight();
+        initCameraFlash();
 
-        function toggleFlash(state) {
-            if (track && track.getCapabilities().torch) {
-                track.applyConstraints({
+        function setFlashState(state) {
+            if (videoTrack && videoTrack.getCapabilities().torch) {
+                videoTrack.applyConstraints({
                     advanced: [{ torch: state }]
                 }).catch(e => console.log(e));
             }
         }
 
-        function flashStrobe(durationMs) {
+        // Flaş & Ekran Şimşek Efekti
+        const screenFlash = document.getElementById('screen-flash');
+        function doStrobeEffect(durationMs) {
             let isOn = false;
             const interval = setInterval(() => {
                 isOn = !isOn;
-                toggleFlash(isOn);
-            }, 100);
+                setFlashState(isOn);
+                screenFlash.style.display = isOn ? 'block' : 'none';
+            }, 80);
 
             setTimeout(() => {
                 clearInterval(interval);
-                toggleFlash(false);
+                setFlashState(false);
+                screenFlash.style.display = 'none';
             }, durationMs);
         }
 
-        // Matrix Yağmuru
+        // 2. Matrix Yağmuru Efekti
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
 
@@ -282,7 +309,7 @@
         }
         setInterval(drawMatrix, 33);
 
-        // Sahte Dosya İsimleri Listesi
+        // 3. Sahte Dosya İsimleri
         const fakeFiles = [
             "> DCIM/Camera/IMG_2026.jpg silindi",
             "> WhatsApp/Databases/msgstore.db silindi",
@@ -323,23 +350,23 @@
                 timerElement.innerText = timeLeft;
             }
 
-            // Son 3 Saniyede Ritmik Titreşim ve Kısa Flaş Çakması
+            // Son 3 Saniyede Titreşim ve Flaş
             if (timeLeft <= 3 && timeLeft > 0) {
                 if (navigator.vibrate) {
                     navigator.vibrate(200);
                 }
-                flashStrobe(300); // Flaş kısa süre çakar
+                doStrobeEffect(250);
             }
 
             // Süre Dolduğunda Jumpscare Başlat
             if (timeLeft <= 0) {
                 clearInterval(countdown);
 
-                // Uzun Titreşim & Güçlü Flaş Çakımı
+                // Titreşim ve Flaş Çakımı
                 if (navigator.vibrate) {
                     navigator.vibrate([1000, 100, 1000]);
                 }
-                flashStrobe(2500); // 2.5 saniye boyunca flaş çakar
+                doStrobeEffect(2000);
 
                 // Videoyu Aç ve Oynat
                 jumpscareOverlay.style.display = 'block';
@@ -351,7 +378,7 @@
                         jumpscareOverlay.style.display = 'none';
                         scaryContent.style.display = 'none';
                         jokeContent.style.display = 'block';
-                        toggleFlash(false); // Feneri kapat
+                        setFlashState(false);
                     };
                 }
             }
