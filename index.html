@@ -8,7 +8,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
             width: 100%; height: 100%; overflow: hidden;
-            background: #000; font-family: 'Courier New', Courier, monospace; position: fixed;
+            background: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; position: fixed;
         }
         canvas { display: block; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
         
@@ -22,7 +22,7 @@
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%); z-index: 10;
             background: rgba(10, 10, 10, 0.98); border: 2px solid #ff0000;
-            padding: 20px; border-radius: 12px; text-align: center;
+            padding: 20px; border-radius: 16px; text-align: center;
             width: 90%; max-width: 350px; color: white;
             animation: red-alert 0.5s infinite;
         }
@@ -34,41 +34,58 @@
             border: 1px solid #ff3333; margin: 10px 0 5px 0; overflow: hidden;
         }
         .progress-bar { width: 0%; height: 12px; background: linear-gradient(90deg, #ff9900, #ff0000); transition: width 0.3s; }
-        .file-status { font-size: 10px; color: #00ff00; height: 15px; overflow: hidden; white-space: nowrap; margin-bottom: 10px; text-align: left; opacity: 0.8; }
-        .timer-container { color: #ffcc00; font-size: 14px; font-weight: bold; background: rgba(255, 0, 0, 0.2); padding: 8px; border-radius: 6px; border: 1px dashed #ff3333; }
+        .file-status { font-size: 10px; color: #00ff00; height: 15px; overflow: hidden; white-space: nowrap; margin-bottom: 10px; text-align: left; opacity: 0.8; font-family: monospace; }
+        .timer-container { color: #ffcc00; font-size: 14px; font-weight: bold; background: rgba(255, 0, 0, 0.2); padding: 8px; border-radius: 8px; border: 1px dashed #ff3333; }
 
         .cam-alert {
             display: none;
-            color: #ff0000;
-            background: #000;
+            color: #ff3333;
+            background: #1a0000;
             border: 1px solid #ff0000;
-            padding: 5px;
+            padding: 6px;
             font-size: 11px;
             margin-top: 8px;
+            border-radius: 6px;
             font-weight: bold;
         }
 
-        .popup-error {
+        /* Android Material Design Tarzı Sistem Diyalog Kutusu */
+        .android-dialog {
             position: absolute;
-            background: #d4d0c8;
-            border: 2px solid #ffffff;
-            border-right-color: #404040;
-            border-bottom-color: #404040;
-            padding: 10px;
-            color: #000;
-            font-family: sans-serif;
-            font-size: 12px;
+            background: #212121;
+            border: 1px solid #333333;
+            border-radius: 20px;
+            padding: 18px;
+            color: #ffffff;
             z-index: 20;
-            box-shadow: 3px 3px 10px rgba(0,0,0,0.7);
-            width: 200px;
+            box-shadow: 0px 8px 24px rgba(0,0,0,0.8);
+            width: 260px;
         }
-        .popup-header {
-            background: #000080;
-            color: white;
-            padding: 2px 5px;
+        .android-dialog-title {
+            color: #ff5252;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .android-dialog-body {
+            color: #cccccc;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 14px;
+        }
+        .android-dialog-btn {
+            background: transparent;
+            color: #00e676;
+            border: none;
+            font-size: 13px;
             font-weight: bold;
-            font-size: 10px;
-            margin: -10px -10px 8px -10px;
+            float: right;
+            padding: 4px 8px;
+            cursor: pointer;
+            text-transform: uppercase;
         }
 
         #fullscreen-jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: #000; }
@@ -81,7 +98,7 @@
         .restart-btn {
             background: linear-gradient(90deg, #00ff00, #008800);
             color: #000; border: none; padding: 10px 20px;
-            font-size: 14px; font-weight: bold; border-radius: 5px;
+            font-size: 14px; font-weight: bold; border-radius: 8px;
             cursor: pointer; text-transform: uppercase;
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
         }
@@ -165,16 +182,17 @@
         }
         setInterval(drawMatrix, 33);
 
-        function createErrorPopup(msg) {
+        // Android Sistem Tarzı Pop-up Oluşturma
+        function createAndroidDialog(title, bodyMsg) {
             const popup = document.createElement('div');
-            popup.className = 'popup-error';
-            popup.style.top = Math.random() * (window.innerHeight - 100) + 'px';
-            popup.style.left = Math.random() * (window.innerWidth - 180) + 'px';
+            popup.className = 'android-dialog';
+            popup.style.top = (Math.random() * (window.innerHeight - 160) + 20) + 'px';
+            popup.style.left = (Math.random() * (window.innerWidth - 280) + 10) + 'px';
             
             popup.innerHTML = `
-                <div class="popup-header">Sistem Hatası 0x000F</div>
-                <div style="margin-bottom:8px;">❌ ${msg}</div>
-                <button style="float:right; padding:2px 8px;" onclick="this.parentElement.remove()">Tamam</button>
+                <div class="android-dialog-title">⚠️ ${title}</div>
+                <div class="android-dialog-body">${bodyMsg}</div>
+                <button class="android-dialog-btn" onclick="this.parentElement.remove()">TAMAM</button>
             `;
             document.body.appendChild(popup);
         }
@@ -197,8 +215,9 @@
             document.getElementById('fileStatus').innerText = fakeFiles[Math.floor(Math.random() * fakeFiles.length)];
             document.getElementById('timer').innerText = timeLeft;
 
-            if (timeLeft === 7) createErrorPopup("Kritik Bellek Doldu!");
-            if (timeLeft === 4) createErrorPopup("System32/boot.ini Silindi!");
+            // Android Tarzı Uyarı Pop-up'ları
+            if (timeLeft === 7) createAndroidDialog("Android Sistem Uyarısı", "Android AÇIK/KAPALI çekirdeği yanıt vermiyor. Depolama alanı siliniyor.");
+            if (timeLeft === 4) createAndroidDialog("Güvenlik İhlali", "Bilinmeyen kaynaklardan gelen komut dosya erişimi engellenemedi.");
 
             if (timeLeft <= 4 && timeLeft > 0) {
                 document.getElementById('camAlert').style.display = 'block';
@@ -214,7 +233,7 @@
                 clearInterval(countdown);
                 if (navigator.vibrate) navigator.vibrate([1000, 100, 1000]);
 
-                document.querySelectorAll('.popup-error').forEach(e => e.remove());
+                document.querySelectorAll('.android-dialog').forEach(e => e.remove());
 
                 const overlay = document.getElementById('fullscreen-jumpscare');
                 const video = document.getElementById('jumpscareVideo');
