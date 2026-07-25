@@ -8,114 +8,161 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
             width: 100%; height: 100%; overflow: hidden;
-            background: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
-            position: fixed; user-select: none;
+            background: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            position: fixed; user-select: none; transition: transform 0.1s ease;
         }
 
-        /* 1. Aşama: Samsung Logo Ekranı (Model Adı Olmadan) */
+        /* 1. Samsung Başlangıç Ekranı */
         #samsung-screen {
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             width: 100%; height: 100%; background: #000; color: #fff; text-align: center;
+            position: absolute; top:0; left:0; z-index: 1000;
         }
-        .samsung-title { font-size: 28px; font-weight: 300; letter-spacing: 4px; }
-        .powered-by { font-size: 11px; color: #777; margin-top: 10px; font-weight: 400; letter-spacing: 1px; }
+        .samsung-title { font-size: 30px; font-weight: 300; letter-spacing: 5px; }
+        .powered-by { font-size: 11px; color: #777; margin-top: 12px; font-weight: 400; letter-spacing: 1px; }
         .samsung-secured { font-size: 9px; color: #444; position: absolute; bottom: 30px; letter-spacing: 1px; }
 
-        /* Glitch (Bozulma) Efekti */
-        .glitch-active {
-            animation: glitch-anim 0.1s infinite;
-        }
+        /* Glitch (Ekran Bozulma) Efekti */
+        .glitch-active { animation: glitch-anim 0.08s infinite; }
         @keyframes glitch-anim {
             0% { background: #000; transform: translate(0); }
-            20% { background: #ff0000; transform: translate(-5px, 5px); }
-            40% { background: #0000ff; transform: translate(5px, -5px); }
+            20% { background: #ff0000; transform: translate(-8px, 5px); }
+            40% { background: #0000ff; transform: translate(8px, -5px); }
             60% { background: #ff0055; filter: invert(100%); }
-            80% { background: #000; transform: translate(-3px, -3px); }
+            80% { background: #000; transform: translate(-5px, -3px); }
             100% { background: #ff0000; transform: translate(0); }
         }
 
-        /* 2. Aşama: EZPhone Virüs Ekranı */
-        #virus-screen {
-            display: none; width: 100%; height: 100%; background: #ff0000;
-            color: #ffffff; flex-direction: column; justify-content: center;
-            align-items: center; text-align: center; padding: 20px;
+        /* Matrix Arka Planı */
+        canvas { display: block; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
+        
+        @keyframes red-alert {
+            0% { box-shadow: 0 0 15px #ff0000; border-color: #ff0000; }
+            50% { box-shadow: 0 0 50px #ff0000; border-color: #ffffff; background: rgba(40, 0, 0, 0.98); }
+            100% { box-shadow: 0 0 15px #ff0000; border-color: #ff0000; }
         }
-        .virus-title { font-size: 32px; font-weight: 900; letter-spacing: 3px; font-family: monospace; text-shadow: 2px 2px #000; }
-        .virus-sub { font-size: 16px; margin-top: 15px; font-weight: bold; font-family: monospace; animation: blink 0.3s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
 
-        /* 3. Aşama: Android No Command Ekranı */
-        #recovery-screen {
-            display: none; width: 100%; height: 100%; background: #000;
-            color: #fff; flex-direction: column; justify-content: center;
-            align-items: center; text-align: center; font-family: sans-serif;
+        /* Android Virüs Kutu Alanı */
+        .warning-box {
+            display: none;
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 10;
+            background: rgba(15, 15, 15, 0.98); border: 2px solid #ff0000;
+            padding: 20px; border-radius: 16px; text-align: center;
+            width: 90%; max-width: 350px; color: white;
+            animation: red-alert 0.4s infinite;
         }
-        .android-icon { font-size: 60px; margin-bottom: 15px; color: #ff3333; }
-        .no-command-text { color: #ff3333; font-size: 18px; font-weight: bold; }
-        .recovery-log { font-size: 11px; color: #888; font-family: monospace; margin-top: 20px; text-align: left; }
+        .warning-title { color: #ff3333; font-size: 17px; font-weight: bold; margin-bottom: 8px; }
+        .warning-text { font-size: 12px; line-height: 1.3; margin-bottom: 10px; color: #dddddd; }
 
-        /* Jumpscare & Şaka Sonu */
+        .ip-info {
+            font-size: 10px; color: #ffcc00; font-family: monospace; background: rgba(255,255,255,0.05);
+            padding: 4px; border-radius: 4px; margin-bottom: 8px;
+        }
+
+        .progress-container {
+            width: 100%; background-color: #111; border-radius: 5px;
+            border: 1px solid #ff3333; margin: 8px 0 5px 0; overflow: hidden;
+        }
+        .progress-bar { width: 0%; height: 12px; background: linear-gradient(90deg, #ff9900, #ff0000); transition: width 0.3s; }
+        .file-status { font-size: 10px; color: #00ff00; height: 15px; overflow: hidden; white-space: nowrap; margin-bottom: 10px; text-align: left; opacity: 0.9; font-family: monospace; }
+        .timer-container { color: #ffcc00; font-size: 13px; font-weight: bold; background: rgba(255, 0, 0, 0.2); padding: 8px; border-radius: 8px; border: 1px dashed #ff3333; }
+
+        .cam-alert {
+            display: none; color: #ffffff; background: #ff0000; border: 1px solid #ffffff;
+            padding: 6px; font-size: 10px; margin-top: 8px; border-radius: 6px; font-weight: bold;
+            animation: red-alert 0.2s infinite;
+        }
+
+        /* Android Pop-up Diyalogları */
+        .android-dialog {
+            position: absolute; background: #212121; border: 1px solid #ff3333; border-radius: 16px;
+            padding: 16px; color: #ffffff; z-index: 20; box-shadow: 0px 8px 25px rgba(255,0,0,0.5); width: 260px;
+        }
+        .android-dialog-title { color: #ff5252; font-size: 14px; font-weight: bold; margin-bottom: 6px; }
+        .android-dialog-body { color: #cccccc; font-size: 11px; line-height: 1.4; margin-bottom: 12px; }
+        .android-dialog-btn {
+            background: transparent; color: #00e676; border: none; font-size: 12px;
+            font-weight: bold; float: right; padding: 4px 8px; cursor: pointer; text-transform: uppercase;
+        }
+
+        /* Fullscreen Jumpscare & Şaka */
         #fullscreen-jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: #000; }
         #jumpscareVideo { width: 100%; height: 100%; object-fit: contain; background: #000; }
 
-        #joke-screen {
-            display: none; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); z-index: 100;
-            background: rgba(15, 15, 15, 0.95); border: 2px solid #00ff00;
-            padding: 25px; border-radius: 16px; text-align: center;
-            width: 85%; max-width: 320px; color: white;
-        }
-        .joke-title { color: #00ff00; font-size: 24px; font-weight: bold; margin-bottom: 15px; }
+        #joke-content { display: none; }
+        .joke-title { color: #00ff00; font-size: 24px; font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 10px #00ff00; }
+        .joke-text { font-size: 15px; color: #ffffff; line-height: 1.6; margin-bottom: 20px; }
+        
         .restart-btn {
-            background: #00ff00; color: #000; border: none; padding: 10px 20px;
-            font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 15px;
+            background: linear-gradient(90deg, #00ff00, #008800); color: #000; border: none;
+            padding: 10px 20px; font-size: 14px; font-weight: bold; border-radius: 8px;
+            cursor: pointer; text-transform: uppercase; box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. Samsung Başlangıç Ekranı (Model İsmi Yok) -->
+    <!-- Samsung Logo Ekranı -->
     <div id="samsung-screen">
         <div class="samsung-title">SAMSUNG</div>
         <div class="powered-by">Powered by Android</div>
         <div class="samsung-secured">Secured by Knox</div>
     </div>
 
-    <!-- 2. EZPhone Kırmızı Virüs Ekranı -->
-    <div id="virus-screen">
-        <div class="virus-title">EZPHONE VIRUS v1</div>
-        <div class="virus-sub">DELETING SYSTEM FILES...</div>
-        <div style="font-size: 12px; margin-top: 30px; font-family: monospace;">CRITICAL ERROR: ROOT OVERRIDE</div>
-    </div>
+    <canvas id="matrix"></canvas>
 
-    <!-- 3. Android No Command Ekranı -->
-    <div id="recovery-screen">
-        <div class="android-icon">⚠️</div>
-        <div class="no-command-text">No command.</div>
-        <div class="recovery-log" id="recoveryLog">
-            E:Failed to mount /system<br>
-            E:Can't open /dev/block/bootdevice<br>
-            E:Formatting /data...
-        </div>
-    </div>
-
-    <!-- 4. Korku Videosu & Şaka Ekranı -->
     <div id="fullscreen-jumpscare">
         <video id="jumpscareVideo" preload="auto" playsinline>
             <source src="korku.mp4" type="video/mp4">
         </video>
     </div>
 
-    <div id="joke-screen">
-        <div class="joke-title">YAKALANDIN! 😱</div>
-        <p style="font-size: 14px; line-height: 1.5;">Telefonuna hiçbir şey olmadı,<br>tamamen şakaydı! ❤️</p>
-        <button class="restart-btn" onclick="location.reload()">Başa Dön</button>
+    <!-- Sistem İkaz Ekranı -->
+    <div class="warning-box" id="warningBox">
+        <div id="scary-content">
+            <div class="warning-title">🚨 KRİTİK SİSTEM İHLALİ 🚨</div>
+            <div class="ip-info">HEDEF IP: 185.199.108.153 (TR)</div>
+            <div class="warning-text">Cihaz belleği ve depolama alanı biçimlendiriliyor. Lütfen kapatmayın!</div>
+            <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+            <div style="font-size: 11px; color: #ffcc00; margin-bottom: 5px;">Siliniyor: <span id="percentText">0%</span></div>
+            <div class="file-status" id="fileStatus">> /system/root_access...</div>
+            
+            <div class="cam-alert" id="camAlert">📸 ÖN KAMERA & MİKROFON AKTİF (KAYIT EDİLİYOR)</div>
+
+            <div class="timer-container" style="margin-top: 10px;">Tam Sıfırlamaya:<br><span id="timer" style="font-size: 22px; color: #ff0000;">10</span> saniye</div>
+        </div>
+
+        <div id="joke-content">
+            <div class="joke-title">YAKALANDIN! 😱</div>
+            <div class="joke-text">
+                Telefonuna hiçbir şey olmadı,<br>tamamen şakaydı! ❤️
+            </div>
+            <button class="restart-btn" onclick="location.reload()">Başa Dön</button>
+        </div>
     </div>
 
     <script>
         let videoTrack = null;
+        let audioCtx = null;
 
-        // Flaş izni için ilk dokunuşu yakala
+        // Bip Ses Efekti
+        function playBeep() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.value = 850;
+                gain.gain.value = 0.1;
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch (e) {}
+        }
+
+        // Flaş İzni Yakalama
         document.body.addEventListener('click', async () => {
             if (!videoTrack) {
                 try {
@@ -131,48 +178,123 @@
             }
         }
 
-        // Akış Zamanlaması
+        // Matrix Yağmuru Efekti
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const fontSize = 14;
+        let columns = Math.floor(canvas.width / fontSize);
+        let drops = Array(columns).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ff0000';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 33);
+
+        function createAndroidDialog(title, bodyMsg) {
+            const popup = document.createElement('div');
+            popup.className = 'android-dialog';
+            popup.style.top = (Math.random() * (window.innerHeight - 160) + 20) + 'px';
+            popup.style.left = (Math.random() * (window.innerWidth - 280) + 10) + 'px';
+            
+            popup.innerHTML = `
+                <div class="android-dialog-title">⚠️ ${title}</div>
+                <div class="android-dialog-body">${bodyMsg}</div>
+                <button class="android-dialog-btn" onclick="this.parentElement.remove()">TAMAM</button>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        // AÇILIŞ DÖNGÜSÜ: Samsung Logo -> Glitch -> Virüs Ekranı
         setTimeout(() => {
-            // 3. saniyede: Glitch (bozulma) başlar
-            document.body.classList.add('glitch-active');
+            // 2.5 sn sonra Samsung logosu bozulur (Glitch)
+            document.getElementById('samsung-screen').classList.add('glitch-active');
             if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
             setFlashState(true);
 
             setTimeout(() => {
-                // 4.5. saniyede: Kırmızı EZPhone Virüs Ekranına geçiş
-                document.body.classList.remove('glitch-active');
+                // Logo tamamen kaybolur ve Virüs Uyarısı Açılır
                 setFlashState(false);
                 document.getElementById('samsung-screen').style.display = 'none';
-                document.getElementById('virus-screen').style.display = 'flex';
-                if (navigator.vibrate) navigator.vibrate([400, 100, 400]);
+                document.getElementById('warningBox').style.display = 'block';
 
-                setTimeout(() => {
-                    // 7.5. saniyede: Android Recovery (No Command) Ekranına geçiş
-                    document.getElementById('virus-screen').style.display = 'none';
-                    document.getElementById('recovery-screen').style.display = 'flex';
+                // Geri Sayım Başlar
+                startVirüsCountdown();
+            }, 1200);
 
-                    setTimeout(() => {
-                        // 10. saniyede: Jumpscare Video Patlaması!
-                        if (navigator.vibrate) navigator.vibrate([1000, 100, 1000]);
-                        const overlay = document.getElementById('fullscreen-jumpscare');
-                        const video = document.getElementById('jumpscareVideo');
-                        
-                        overlay.style.display = 'block';
-                        video.play().catch(() => {});
+        }, 2500);
 
-                        video.onended = () => {
-                            overlay.style.display = 'none';
-                            document.getElementById('recovery-screen').style.display = 'none';
-                            document.getElementById('joke-screen').style.display = 'block';
-                            setFlashState(false);
-                        };
-                    }, 2500);
+        function startVirüsCountdown() {
+            let timeLeft = 10;
+            let progress = 0;
+            const fakeFiles = [
+                "> DCIM/Camera/IMG_2026.jpg silindi", 
+                "> WhatsApp/Databases/msgstore.db silindi", 
+                "> System/Contacts.vcf silindi",
+                "> Banka_Sifreleri.key dışa aktarıldı"
+            ];
 
-                }, 3000);
+            const countdown = setInterval(() => {
+                timeLeft--;
+                progress += 10;
+                if(progress > 100) progress = 100;
 
-            }, 1500);
+                playBeep(); // Her saniye ses tonu çalar
 
-        }, 3000);
+                document.getElementById('progressBar').style.width = progress + '%';
+                document.getElementById('percentText').innerText = progress + '%';
+                document.getElementById('fileStatus').innerText = fakeFiles[Math.floor(Math.random() * fakeFiles.length)];
+                document.getElementById('timer').innerText = timeLeft;
+
+                if (timeLeft === 8) createAndroidDialog("Sistem İkazı", "Sistem izinleri çiğnendi. Cihaz kilitleniyor.");
+                if (timeLeft === 5) createAndroidDialog("Güvenlik Duvarı Çöktü", "Kamera ve mikrofon verileri uzak sunucuya aktarılıyor.");
+
+                if (timeLeft <= 4 && timeLeft > 0) {
+                    document.getElementById('camAlert').style.display = 'block';
+                    document.body.style.transform = `translate(${(Math.random()-0.5)*10}px, ${(Math.random()-0.5)*10}px)`;
+                }
+
+                if (timeLeft <= 3 && timeLeft > 0) {
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    setFlashState(true);
+                    setTimeout(() => setFlashState(false), 120);
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    document.body.style.transform = 'none';
+                    if (navigator.vibrate) navigator.vibrate([1000, 100, 1000]);
+
+                    document.querySelectorAll('.android-dialog').forEach(e => e.remove());
+
+                    const overlay = document.getElementById('fullscreen-jumpscare');
+                    const video = document.getElementById('jumpscareVideo');
+                    overlay.style.display = 'block';
+
+                    video.play().catch(() => {});
+                    video.onended = () => {
+                        overlay.style.display = 'none';
+                        document.getElementById('scary-content').style.display = 'none';
+                        document.getElementById('joke-content').style.display = 'block';
+                        setFlashState(false);
+                    };
+                }
+            }, 1000);
+        }
     </script>
 </body>
 </html>
