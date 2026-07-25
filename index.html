@@ -33,6 +33,16 @@
             100% { background: #ff0000; transform: translate(0); }
         }
 
+        /* EZPhone Kırmızı Virüs Başlangıç Ekranı */
+        #ezphone-screen {
+            display: none; position: absolute; top:0; left:0; width: 100%; height: 100%;
+            background: #ff0000; color: #ffffff; flex-direction: column; justify-content: center;
+            align-items: center; text-align: center; padding: 20px; z-index: 900;
+        }
+        .ez-title { font-size: 30px; font-weight: 900; letter-spacing: 3px; font-family: monospace; text-shadow: 2px 2px #000; }
+        .ez-sub { font-size: 15px; margin-top: 15px; font-weight: bold; font-family: monospace; animation: blink 0.3s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+
         /* Matrix Arka Planı */
         canvas { display: block; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
         
@@ -103,11 +113,18 @@
 </head>
 <body>
 
-    <!-- Samsung Logo Ekranı -->
+    <!-- 1. Samsung Logo Ekranı -->
     <div id="samsung-screen">
         <div class="samsung-title">SAMSUNG</div>
         <div class="powered-by">Powered by Android</div>
         <div class="samsung-secured">Secured by Knox</div>
+    </div>
+
+    <!-- 2. EZPhone Kırmızı Virüs Ekranı (Videodaki Gibi) -->
+    <div id="ezphone-screen">
+        <div class="ez-title">EZPHONE VIRUS v1</div>
+        <div class="ez-sub">DELETING SYSTEM FILES...</div>
+        <div style="font-size: 12px; margin-top: 30px; font-family: monospace;">CRITICAL ERROR: ROOT OVERRIDE</div>
     </div>
 
     <canvas id="matrix"></canvas>
@@ -118,7 +135,7 @@
         </video>
     </div>
 
-    <!-- Sistem İkaz Ekranı -->
+    <!-- 3. Sistem İkaz ve Biçimlendirme Ekranı -->
     <div class="warning-box" id="warningBox">
         <div id="scary-content">
             <div class="warning-title">🚨 KRİTİK SİSTEM İHLALİ 🚨</div>
@@ -219,24 +236,32 @@
             document.body.appendChild(popup);
         }
 
-        // AÇILIŞ DÖNGÜSÜ: Samsung Logo -> Glitch -> Virüs Ekranı
+        // AÇILIŞ AKIŞI: Samsung Logo -> Glitch -> EZPhone Virüs Ekranı -> Android Biçimlendirme Ekranı
         setTimeout(() => {
-            // 2.5 sn sonra Samsung logosu bozulur (Glitch)
+            // 2 saniye sonra Samsung logosu bozulur (Glitch)
             document.getElementById('samsung-screen').classList.add('glitch-active');
             if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
             setFlashState(true);
 
             setTimeout(() => {
-                // Logo tamamen kaybolur ve Virüs Uyarısı Açılır
-                setFlashState(false);
+                // Samsung logosu kapanır, EZPhone kırmızı ekranı açılır
                 document.getElementById('samsung-screen').style.display = 'none';
-                document.getElementById('warningBox').style.display = 'block';
+                document.getElementById('ezphone-screen').style.display = 'flex';
+                if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
 
-                // Geri Sayım Başlar
-                startVirüsCountdown();
+                setTimeout(() => {
+                    // EZPhone ekranı kapanır, asıl Android biçimlendirme ve geri sayım kutusu açılır
+                    setFlashState(false);
+                    document.getElementById('ezphone-screen').style.display = 'none';
+                    document.getElementById('warningBox').style.display = 'block';
+
+                    // Geri Sayımı Başlat
+                    startVirüsCountdown();
+                }, 2000);
+
             }, 1200);
 
-        }, 2500);
+        }, 2000);
 
         function startVirüsCountdown() {
             let timeLeft = 10;
@@ -253,7 +278,7 @@
                 progress += 10;
                 if(progress > 100) progress = 100;
 
-                playBeep(); // Her saniye ses tonu çalar
+                playBeep(); // Her saniye bip sesi
 
                 document.getElementById('progressBar').style.width = progress + '%';
                 document.getElementById('percentText').innerText = progress + '%';
