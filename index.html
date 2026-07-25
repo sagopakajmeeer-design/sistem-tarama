@@ -5,22 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Başlatılıyor...</title>
     <style>
+        /* Orijinal SamsungOne Font Tanımlaması */
+        @font-face {
+            font-family: 'SamsungOne';
+            src: url('https://cdn.jsdelivr.net/gh/mshahat/SamsungOne-Font/SamsungOne-400.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'SamsungOne';
+            src: url('https://cdn.jsdelivr.net/gh/mshahat/SamsungOne-Font/SamsungOne-700.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
             width: 100%; height: 100%; overflow: hidden;
-            background: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #000; font-family: 'SamsungOne', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             position: fixed; user-select: none; transition: transform 0.1s ease;
         }
 
-        /* Samsung Başlangıç Ekranı */
+        /* Orijinal Samsung Başlangıç Ekranı */
         #samsung-screen {
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            width: 100%; height: 100%; background: #000; color: #fff; text-align: center;
+            width: 100%; height: 100%; background: #000; color: #ffffff; text-align: center;
             position: absolute; top: 0; left: 0; z-index: 1000;
+            -webkit-font-smoothing: antialiased;
         }
-        .samsung-title { font-size: 30px; font-weight: 300; letter-spacing: 5px; }
-        .powered-by { font-size: 11px; color: #777; margin-top: 12px; font-weight: 400; letter-spacing: 1px; }
-        .samsung-secured { font-size: 9px; color: #444; position: absolute; bottom: 30px; letter-spacing: 1px; }
+        .samsung-title { 
+            font-family: 'SamsungOne', sans-serif;
+            font-size: 34px; 
+            font-weight: 400; 
+            letter-spacing: 6px; 
+            text-transform: uppercase;
+        }
+        .powered-by { 
+            font-family: 'SamsungOne', sans-serif;
+            font-size: 11px; 
+            color: #888888; 
+            margin-top: 15px; 
+            font-weight: 400; 
+            letter-spacing: 1.5px; 
+        }
+        .samsung-secured { 
+            font-family: 'SamsungOne', sans-serif;
+            font-size: 10px; 
+            color: #555555; 
+            position: absolute; 
+            bottom: 35px; 
+            letter-spacing: 1px; 
+        }
 
         /* Glitch (Ekran Bozulma) Efekti */
         .glitch-active { animation: glitch-anim 0.08s infinite; }
@@ -103,7 +138,7 @@
 </head>
 <body>
 
-    <!-- Samsung Logo Ekranı -->
+    <!-- Samsung Logo Ekranı (Orijinal SamsungOne Fontu ile) -->
     <div id="samsung-screen">
         <div class="samsung-title">SAMSUNG</div>
         <div class="powered-by">Powered by Android</div>
