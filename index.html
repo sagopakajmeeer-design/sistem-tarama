@@ -12,11 +12,11 @@
             position: fixed; user-select: none; transition: transform 0.1s ease;
         }
 
-        /* 1. Samsung Başlangıç Ekranı */
+        /* Samsung Başlangıç Ekranı */
         #samsung-screen {
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             width: 100%; height: 100%; background: #000; color: #fff; text-align: center;
-            position: absolute; top:0; left:0; z-index: 1000;
+            position: absolute; top: 0; left: 0; z-index: 1000;
         }
         .samsung-title { font-size: 30px; font-weight: 300; letter-spacing: 5px; }
         .powered-by { font-size: 11px; color: #777; margin-top: 12px; font-weight: 400; letter-spacing: 1px; }
@@ -32,16 +32,6 @@
             80% { background: #000; transform: translate(-5px, -3px); }
             100% { background: #ff0000; transform: translate(0); }
         }
-
-        /* EZPhone Kırmızı Virüs Başlangıç Ekranı */
-        #ezphone-screen {
-            display: none; position: absolute; top:0; left:0; width: 100%; height: 100%;
-            background: #ff0000; color: #ffffff; flex-direction: column; justify-content: center;
-            align-items: center; text-align: center; padding: 20px; z-index: 900;
-        }
-        .ez-title { font-size: 30px; font-weight: 900; letter-spacing: 3px; font-family: monospace; text-shadow: 2px 2px #000; }
-        .ez-sub { font-size: 15px; margin-top: 15px; font-weight: bold; font-family: monospace; animation: blink 0.3s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
 
         /* Matrix Arka Planı */
         canvas { display: block; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
@@ -113,18 +103,11 @@
 </head>
 <body>
 
-    <!-- 1. Samsung Logo Ekranı -->
+    <!-- Samsung Logo Ekranı -->
     <div id="samsung-screen">
         <div class="samsung-title">SAMSUNG</div>
         <div class="powered-by">Powered by Android</div>
         <div class="samsung-secured">Secured by Knox</div>
-    </div>
-
-    <!-- 2. EZPhone Kırmızı Virüs Ekranı (Videodaki Gibi) -->
-    <div id="ezphone-screen">
-        <div class="ez-title">EZPHONE VIRUS v1</div>
-        <div class="ez-sub">DELETING SYSTEM FILES...</div>
-        <div style="font-size: 12px; margin-top: 30px; font-family: monospace;">CRITICAL ERROR: ROOT OVERRIDE</div>
     </div>
 
     <canvas id="matrix"></canvas>
@@ -135,7 +118,7 @@
         </video>
     </div>
 
-    <!-- 3. Sistem İkaz ve Biçimlendirme Ekranı -->
+    <!-- Sistem İkaz Ekranı -->
     <div class="warning-box" id="warningBox">
         <div id="scary-content">
             <div class="warning-title">🚨 KRİTİK SİSTEM İHLALİ 🚨</div>
@@ -236,32 +219,24 @@
             document.body.appendChild(popup);
         }
 
-        // AÇILIŞ AKIŞI: Samsung Logo -> Glitch -> EZPhone Virüs Ekranı -> Android Biçimlendirme Ekranı
+        // AKIŞ: Samsung Logo -> Glitch -> Kendi Mega Virüs Panelimiz
         setTimeout(() => {
-            // 2 saniye sonra Samsung logosu bozulur (Glitch)
+            // 2.5 saniye sonra Samsung logosu bozulur (Glitch)
             document.getElementById('samsung-screen').classList.add('glitch-active');
             if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
             setFlashState(true);
 
             setTimeout(() => {
-                // Samsung logosu kapanır, EZPhone kırmızı ekranı açılır
+                // Samsung logosu kapanır, asıl kendi Mega Panelimiz açılır
+                setFlashState(false);
                 document.getElementById('samsung-screen').style.display = 'none';
-                document.getElementById('ezphone-screen').style.display = 'flex';
-                if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
+                document.getElementById('warningBox').style.display = 'block';
 
-                setTimeout(() => {
-                    // EZPhone ekranı kapanır, asıl Android biçimlendirme ve geri sayım kutusu açılır
-                    setFlashState(false);
-                    document.getElementById('ezphone-screen').style.display = 'none';
-                    document.getElementById('warningBox').style.display = 'block';
-
-                    // Geri Sayımı Başlat
-                    startVirüsCountdown();
-                }, 2000);
-
+                // Geri Sayımı Başlat
+                startVirüsCountdown();
             }, 1200);
 
-        }, 2000);
+        }, 2500);
 
         function startVirüsCountdown() {
             let timeLeft = 10;
