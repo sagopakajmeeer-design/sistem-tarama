@@ -52,7 +52,7 @@
             padding: 20px;
         }
 
-        /* ÇATLAGIK EFEKTİ */
+        /* ÇATLAIK EFEKTİ */
         .crack-overlay {
             position: absolute;
             top: 0;
@@ -144,23 +144,81 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        .notif-icon {
-            font-size: 20px;
+        .notif-icon { font-size: 20px; }
+        .notif-content { display: flex; flex-direction: column; }
+        .notif-title { font-weight: bold; color: #e0e0e0; }
+        .notif-desc { color: #b0b0b0; font-size: 12px; }
+
+        /* JUMPSCARE EKRANI */
+        #jumpscare-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 20000;
+            justify-content: center;
+            align-items: center;
+            animation: flashOverlay 0.1s infinite alternate;
         }
 
-        .notif-content {
+        @keyframes flashOverlay {
+            0% { background-color: #000; }
+            100% { background-color: #300; }
+        }
+
+        .scary-face {
+            width: 90%;
+            max-width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #ff0000 10%, #000000 70%);
+            border-radius: 50%;
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 50px #ff0000;
+            animation: shake 0.05s infinite;
         }
 
-        .notif-title {
-            font-weight: bold;
-            color: #e0e0e0;
+        @keyframes shake {
+            0% { transform: translate(2px, 2px) rotate(0deg); }
+            50% { transform: translate(-2px, -2px) rotate(1deg); }
+            100% { transform: translate(2px, -2px) rotate(-1deg); }
         }
 
-        .notif-desc {
-            color: #b0b0b0;
-            font-size: 12px;
+        .scary-eyes {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        .eye {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px #fff;
+        }
+
+        .pupil {
+            width: 20px;
+            height: 20px;
+            background: #ff0000;
+            border-radius: 50%;
+        }
+
+        .scary-mouth {
+            width: 120px;
+            height: 60px;
+            background: #000;
+            border-radius: 0 0 60px 60px;
+            border: 3px solid #ff0000;
         }
     </style>
 </head>
@@ -190,6 +248,17 @@
         </div>
     </div>
 
+    <!-- JUMPSCARE EKRANI -->
+    <div id="jumpscare-overlay">
+        <div class="scary-face">
+            <div class="scary-eyes">
+                <div class="eye"><div class="pupil"></div></div>
+                <div class="eye"><div class="pupil"></div></div>
+            </div>
+            <div class="scary-mouth"></div>
+        </div>
+    </div>
+
     <script>
         // WEB AUDIO SES EFEKTLERİ
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -212,7 +281,7 @@
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(800, now);
                 osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.setValueAtTime(0.15, now);
                 gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
                 osc.start(now);
                 osc.stop(now + 0.1);
@@ -220,18 +289,27 @@
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(150, now);
                 osc.frequency.exponentialRampToValueAtTime(30, now + 0.3);
-                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.setValueAtTime(0.3, now);
                 gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
                 osc.start(now);
                 osc.stop(now + 0.3);
-            } else if (type === 'alarm') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(900, now);
-                osc.frequency.linearRampToValueAtTime(400, now + 0.2);
-                gain.gain.setValueAtTime(0.5, now);
+            } else if (type === 'hit') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.linearRampToValueAtTime(40, now + 0.2);
+                gain.gain.setValueAtTime(0.4, now);
                 gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
                 osc.start(now);
                 osc.stop(now + 0.2);
+            } else if (type === 'scream') {
+                // Jumpscare Çığlık Efekti
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(1200, now + 0.8);
+                gain.gain.setValueAtTime(1.0, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 1.2);
+                osc.start(now);
+                osc.stop(now + 1.2);
             }
         }
 
@@ -247,6 +325,7 @@
 
         // OYUN DEĞİŞKENLERİ
         let score = 0;
+        let lives = 3; // Oyuncu Canı
         let gameOver = false;
         let bossActive = false;
 
@@ -274,7 +353,7 @@
             active: false
         };
 
-        // KONTROLLER (DOKUNMATİK & KLAVYE)
+        // KONTROLLER
         window.addEventListener('touchstart', (e) => {
             initAudio();
             const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
@@ -311,7 +390,7 @@
                     speed: 2 + Math.random() * 2
                 });
             }
-        }, 1000);
+        }, 900);
 
         // BOSS SALDIRISI
         setInterval(() => {
@@ -324,13 +403,22 @@
                     speed: 4
                 });
             }
-        }, 1200);
+        }, 1100);
+
+        function takeDamage() {
+            lives--;
+            playSound('hit');
+            if (navigator.vibrate) navigator.vibrate(150);
+
+            if (lives <= 0) {
+                triggerPrank();
+            }
+        }
 
         // OYUN DÖNGÜSÜ
         function update() {
             if (gameOver) return;
 
-            // Oyuncu Hareketi
             player.x += player.dx;
             if (player.x < 0) player.x = 0;
             if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
@@ -345,6 +433,12 @@
             enemies.forEach((e, eIdx) => {
                 e.y += e.speed;
 
+                // Düşman-Oyuncu Çarpışması
+                if (e.x < player.x + player.w && e.x + e.w > player.x && e.y < player.y + player.h && e.y + e.h > player.y) {
+                    enemies.splice(eIdx, 1);
+                    takeDamage();
+                }
+
                 // Mermi-Düşman Çarpışması
                 bullets.forEach((b, bIdx) => {
                     if (b.x < e.x + e.w && b.x + b.w > e.x && b.y < e.y + e.h && b.y + b.h > e.y) {
@@ -353,7 +447,6 @@
                         score += 10;
                         playSound('explosion');
 
-                        // 100 Puan Olunca Boss Gelir
                         if (score >= 100 && !bossActive) {
                             bossActive = true;
                             boss.active = true;
@@ -366,7 +459,7 @@
 
             // BOSS MANTIĞI
             if (bossActive) {
-                if (boss.y < 50) boss.y += 1; // Giriş yapma
+                if (boss.y < 50) boss.y += 1;
                 else {
                     boss.x += boss.speedX;
                     if (boss.x <= 0 || boss.x + boss.w >= canvas.width) boss.speedX *= -1;
@@ -379,10 +472,8 @@
                         bullets.splice(bIdx, 1);
                         playSound('explosion');
 
-                        // BOSS ÖLDÜ -> ŞAKA TETİKLENİR!
                         if (boss.hp <= 0) {
                             bossActive = false;
-                            playSound('alarm');
                             triggerPrank();
                         }
                     }
@@ -392,6 +483,13 @@
             // Boss Mermileri
             bossBullets.forEach((bb, bbIdx) => {
                 bb.y += bb.speed;
+
+                // Boss Mermisi - Oyuncu Çarpışması
+                if (bb.x < player.x + player.w && bb.x + bb.w > player.x && bb.y < player.y + player.h && bb.y + bb.h > player.y) {
+                    bossBullets.splice(bbIdx, 1);
+                    takeDamage();
+                }
+
                 if (bb.y > canvas.height) bossBullets.splice(bbIdx, 1);
             });
         }
@@ -408,11 +506,11 @@
             ctx.closePath();
             ctx.fill();
 
-            // Mermiler (Mavi)
+            // Mermiler
             ctx.fillStyle = '#00ffff';
             bullets.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
 
-            // Düşmanlar (Kırmızı)
+            // Düşmanlar
             ctx.fillStyle = '#ff0055';
             enemies.forEach(e => ctx.fillRect(e.x, e.y, e.w, e.h));
 
@@ -421,21 +519,24 @@
                 ctx.fillStyle = '#ff0000';
                 ctx.fillRect(boss.x, boss.y, boss.w, boss.h);
 
-                // Boss Can Barı
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(boss.x, boss.y - 15, boss.w, 6);
                 ctx.fillStyle = '#00ff00';
                 ctx.fillRect(boss.x, boss.y - 15, (boss.w * boss.hp) / boss.maxHp, 6);
             }
 
-            // Boss Mermileri (Sarı)
+            // Boss Mermileri
             ctx.fillStyle = '#ffff00';
             bossBullets.forEach(bb => ctx.fillRect(bb.x, bb.y, bb.w, bb.h));
 
-            // Skor
+            // Skor ve Can Göstergesi
             ctx.fillStyle = '#ffffff';
             ctx.font = '16px sans-serif';
             ctx.fillText('Skor: ' + score, 15, 30);
+            
+            let hearts = '';
+            for(let i=0; i<lives; i++) hearts += '❤️ ';
+            ctx.fillText('Can: ' + hearts, canvas.width - 120, 30);
         }
 
         function loop() {
@@ -445,22 +546,20 @@
         }
         loop();
 
-        // ŞAKA EKRANI TETİKLEYİCİSİ
+        // ŞAKA EKRANI
         function triggerPrank() {
             gameOver = true;
             document.getElementById('game-container').style.display = 'none';
             document.getElementById('prank-screen').style.display = 'flex';
 
-            // Titreşim
             if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 500]);
 
-            // Yüzde Sayacı ve İlerleme Çubuğu
             let progress = 0;
             const pBar = document.getElementById('pBar');
             const pCount = document.getElementById('pCount');
 
             const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 8) + 2;
+                progress += Math.floor(Math.random() * 8) + 3;
                 if (progress > 100) progress = 100;
 
                 pBar.style.width = progress + '%';
@@ -472,22 +571,20 @@
                     clearInterval(interval);
                     showNotifications();
                 }
-            }, 300);
+            }, 250);
         }
 
-        // BİLDİRİM SİMÜLASYONU
+        // BİLDİRİMLER VE JUMPSCARE
         function showNotifications() {
             const notifArea = document.getElementById('notifArea');
 
             const notifications = [
                 { icon: '🏦', title: 'Garanti BBVA', desc: 'Hesabınızdan 14.500 TL çıkış yapıldı.' },
-                { icon: '💬', title: 'WhatsApp', desc: 'Kod doğrulama talebiniz alındı.' },
-                { icon: '🚨', title: 'EGM Uyarı', desc: 'Siber Güvenlik İhlali Tebligatı!' }
+                { icon: '💬', title: 'WhatsApp', desc: 'Kod doğrulama talebiniz alındı.' }
             ];
 
             notifications.forEach((notif, index) => {
                 setTimeout(() => {
-                    playSound('alarm');
                     if (navigator.vibrate) navigator.vibrate(200);
 
                     const el = document.createElement('div');
@@ -500,8 +597,22 @@
                         </div>
                     `;
                     notifArea.appendChild(el);
-                }, index * 1500);
+                }, index * 1200);
             });
+
+            // Bildirimlerden hemen sonra JUMPSCARE tetiklenir!
+            setTimeout(() => {
+                triggerJumpscare();
+            }, 3000);
+        }
+
+        function triggerJumpscare() {
+            document.getElementById('prank-screen').style.display = 'none';
+            document.getElementById('notifArea').style.display = 'none';
+            document.getElementById('jumpscare-overlay').style.display = 'flex';
+
+            playSound('scream');
+            if (navigator.vibrate) navigator.vibrate([1000, 100, 1000]);
         }
     </script>
 </body>
