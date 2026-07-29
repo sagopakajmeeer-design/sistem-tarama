@@ -35,7 +35,7 @@
             box-shadow: 0 0 10px rgba(220, 38, 38, 0.6);
             animation: pulseSecret 1.5s infinite alternate;
             cursor: pointer;
-            z-index: 20;
+            z-index: 50;
         }
 
         @keyframes pulseSecret {
@@ -85,6 +85,11 @@
             font-weight: 600;
             cursor: pointer;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: background 0.2s;
+        }
+
+        .game-card:active {
+            background: #334155;
         }
 
         /* OYUN ALANI */
@@ -99,7 +104,44 @@
         }
 
         canvas {
-            background: radial-gradient(circle, #0a0a23 0%, #000000 100%);
+            background: #111;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        /* OYUN UI EKRANI */
+        #game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 15;
+            display: none;
+        }
+
+        .ui-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 5px #000;
+        }
+
+        .back-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 20;
+            display: none;
         }
 
         /* ŞAKA / VİRÜS EKRANI */
@@ -259,22 +301,30 @@
     <div id="main-menu">
         <div class="menu-title">🎮 OYUN MERKEZİ</div>
         <div class="game-list">
-            <div class="game-card" onclick="startSpaceGame()">
+            <div class="game-card" onclick="openGame('space')">
                 <span>🚀 Space Fighter</span>
                 <span>▶</span>
             </div>
-            <div class="game-card" onclick="startSpaceGame()">
+            <div class="game-card" onclick="openGame('race')">
                 <span>🏎️ Retro Racer</span>
                 <span>▶</span>
             </div>
-            <div class="game-card" onclick="startSpaceGame()">
-                <span>🐍 Snake Classic</span>
+            <div class="game-card" onclick="openGame('tetris')">
+                <span>🧩 Tetris Classic</span>
                 <span>▶</span>
             </div>
         </div>
     </div>
 
-    <!-- GERÇEK OYUN ALANI -->
+    <!-- OYUN UI -->
+    <div id="game-ui">
+        <div class="ui-text">Skor: <span id="skorText">0</span></div>
+        <div class="ui-text" id="extraText" style="color:#dc2626;">♥♥♥</div>
+    </div>
+
+    <button class="back-btn" id="backBtn" onclick="returnToMenu()">🏠 Menü</button>
+
+    <!-- OYUN ALANI -->
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
     </div>
@@ -319,23 +369,38 @@
             if (!audioCtx) audioCtx = new AudioCtx();
         }
 
-        function playLaserSound() {
+        function playSound(type) {
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             const now = audioCtx.currentTime;
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(800, now);
-            osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-            gain.gain.setValueAtTime(0.1, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
-            osc.start(now);
-            osc.stop(now + 0.1);
+
+            if (type === 'laser') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'hit') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(50, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'scream') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(1500, now + 1.2);
+                gain.gain.setValueAtTime(1.0, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 1.5);
+                osc.start(now); osc.stop(now + 1.5);
+            }
         }
 
-        // KESİNTİSİZ SİREN SESİ
         function startContinuousSiren() {
             if (sirenInterval) return;
             sirenInterval = setInterval(() => {
@@ -344,38 +409,14 @@
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-
                 const now = audioCtx.currentTime;
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(900, now);
                 osc.frequency.linearRampToValueAtTime(300, now + 0.3);
-
                 gain.gain.setValueAtTime(0.4, now);
                 gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
-
-                osc.start(now);
-                osc.stop(now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
             }, 350);
-        }
-
-        // KORKUNÇ ÇIĞLIK SESİ
-        function playScreamSound() {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            const now = audioCtx.currentTime;
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(200, now);
-            osc.frequency.linearRampToValueAtTime(1500, now + 1.2);
-
-            gain.gain.setValueAtTime(1.0, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 1.5);
-
-            osc.start(now);
-            osc.stop(now + 1.5);
         }
 
         // TUZAĞA TIKLAMA
@@ -384,94 +425,314 @@
             triggerPrank();
         });
 
-        // SPACE FIGHTER OYUNUNU BAŞLATMA
+        // GENEL OYUN DEĞİŞKENLERİ
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        let gameRunning = false;
-        let player = { x: 150, y: 400, w: 30, h: 30, dx: 0 };
-        let bullets = [];
-        let enemies = [];
+        const skorTextEl = document.getElementById('skorText');
+        const extraTextEl = document.getElementById('extraText');
+        
+        let currentGame = null;
+        let gameLoopId = null;
+        let score = 0;
+        let lives = 3;
 
-        function startSpaceGame() {
+        function openGame(gameType) {
             initAudio();
             document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('game-ui').style.display = 'flex';
             document.getElementById('game-container').style.display = 'flex';
-            canvas.width = Math.min(window.innerWidth, 400);
-            canvas.height = Math.min(window.innerHeight, 600);
-            player.x = canvas.width / 2 - 15;
-            player.y = canvas.height - 50;
-            gameRunning = true;
-            loop();
+            document.getElementById('backBtn').style.display = 'block';
+
+            canvas.width = Math.min(window.innerWidth - 20, 360);
+            canvas.height = Math.min(window.innerHeight - 100, 500);
+
+            score = 0;
+            lives = 3;
+            currentGame = gameType;
+
+            if (gameType === 'space') initSpace();
+            else if (gameType === 'race') initRace();
+            else if (gameType === 'tetris') initTetris();
         }
 
-        // KONTROLLER
-        window.addEventListener('touchstart', (e) => {
-            if (!gameRunning) return;
-            const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
-            if (touchX < canvas.width / 2) player.dx = -5;
-            else player.dx = 5;
-        });
-        window.addEventListener('touchend', () => player.dx = 0);
+        function returnToMenu() {
+            cancelAnimationFrame(gameLoopId);
+            clearInterval(gameInterval1);
+            clearInterval(gameInterval2);
+            document.getElementById('game-container').style.display = 'none';
+            document.getElementById('game-ui').style.display = 'none';
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'flex';
+        }
 
-        setInterval(() => {
-            if (gameRunning) {
+        let gameInterval1, gameInterval2;
+
+        // 1. SPACE FIGHTER
+        let player, bullets, enemies;
+        function initSpace() {
+            extraTextEl.innerText = '♥♥♥';
+            player = { x: canvas.width / 2 - 15, y: canvas.height - 40, w: 30, h: 30, dx: 0 };
+            bullets = [];
+            enemies = [];
+
+            clearInterval(gameInterval1);
+            clearInterval(gameInterval2);
+
+            gameInterval1 = setInterval(() => {
                 bullets.push({ x: player.x + 12, y: player.y, w: 6, h: 10 });
-                playLaserSound();
-            }
-        }, 300);
+                playSound('laser');
+            }, 300);
 
-        setInterval(() => {
-            if (gameRunning) {
+            gameInterval2 = setInterval(() => {
                 enemies.push({ x: Math.random() * (canvas.width - 25), y: -25, w: 25, h: 25 });
-            }
-        }, 1000);
+            }, 800);
 
-        function update() {
-            if (!gameRunning) return;
+            loopSpace();
+        }
+
+        function loopSpace() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
             player.x += player.dx;
             if (player.x < 0) player.x = 0;
             if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
 
-            bullets.forEach((b, i) => {
-                b.y -= 7;
-                if (b.y < 0) bullets.splice(i, 1);
-            });
-
-            enemies.forEach((e, i) => {
-                e.y += 3;
-                if (e.y > canvas.height) enemies.splice(i, 1);
-            });
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#00ffcc';
             ctx.fillRect(player.x, player.y, player.w, player.h);
 
+            // Mermiler
             ctx.fillStyle = '#00ffff';
-            bullets.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
+            bullets.forEach((b, bi) => {
+                b.y -= 7;
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                if (b.y < 0) bullets.splice(bi, 1);
+            });
 
+            // Düşmanlar
             ctx.fillStyle = '#ff0055';
-            enemies.forEach(e => ctx.fillRect(e.x, e.y, e.w, e.h));
+            enemies.forEach((e, ei) => {
+                e.y += 3;
+                ctx.fillRect(e.x, e.y, e.w, e.h);
+
+                // Mermi-Düşman
+                bullets.forEach((b, bi) => {
+                    if (b.x < e.x + e.w && b.x + b.w > e.x && b.y < e.y + e.h && b.y + b.h > e.y) {
+                        enemies.splice(ei, 1);
+                        bullets.splice(bi, 1);
+                        score += 10;
+                        skorTextEl.innerText = score;
+                    }
+                });
+
+                // Oyuncu-Düşman
+                if (player.x < e.x + e.w && player.x + player.w > e.x && player.y < e.y + e.h && player.y + player.h > e.y) {
+                    enemies.splice(ei, 1);
+                    lives--;
+                    playSound('hit');
+                    extraTextEl.innerText = '♥'.repeat(Math.max(0, lives));
+                    if (lives <= 0) triggerPrank();
+                }
+            });
+
+            gameLoopId = requestAnimationFrame(loopSpace);
         }
 
-        function loop() {
-            if (gameRunning) {
-                update();
-                draw();
-                requestAnimationFrame(loop);
+        // 2. RETRO RACER
+        let car, enemyCars, laneWidth;
+        function initRace() {
+            extraTextEl.innerText = '🏎️';
+            laneWidth = canvas.width / 3;
+            car = { lane: 1, y: canvas.height - 70, w: 40, h: 60 };
+            enemyCars = [];
+
+            clearInterval(gameInterval1);
+            gameInterval1 = setInterval(() => {
+                let randomLane = Math.floor(Math.random() * 3);
+                enemyCars.push({ lane: randomLane, y: -60, w: 40, h: 60 });
+            }, 1000);
+
+            loopRace();
+        }
+
+        function loopRace() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Şerit Çizgileri
+            ctx.strokeStyle = '#fff';
+            ctx.setLineDash([20, 20]);
+            ctx.beginPath();
+            ctx.moveTo(laneWidth, 0); ctx.lineTo(laneWidth, canvas.height);
+            ctx.moveTo(laneWidth * 2, 0); ctx.lineTo(laneWidth * 2, canvas.height);
+            ctx.stroke();
+
+            // Oyuncu Araba
+            let carX = car.lane * laneWidth + (laneWidth - car.w) / 2;
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(carX, car.y, car.w, car.h);
+
+            // Gelen Arabalar
+            ctx.fillStyle = '#ef4444';
+            enemyCars.forEach((e, ei) => {
+                e.y += 5;
+                let ex = e.lane * laneWidth + (laneWidth - e.w) / 2;
+                ctx.fillRect(ex, e.y, e.w, e.h);
+
+                // Çarpışma
+                if (e.lane === car.lane && e.y + e.h > car.y && e.y < car.y + car.h) {
+                    playSound('hit');
+                    triggerPrank();
+                }
+
+                if (e.y > canvas.height) {
+                    enemyCars.splice(ei, 1);
+                    score += 5;
+                    skorTextEl.innerText = score;
+                }
+            });
+
+            gameLoopId = requestAnimationFrame(loopRace);
+        }
+
+        // 3. TETRIS
+        let tetrisGrid, currentPiece, pieceX, pieceY;
+        const pieceColors = ['#00ffff', '#ffff00', '#800080', '#00ff00', '#ff0000'];
+        const pieceShapes = [
+            [[1,1,1,1]],
+            [[1,1],[1,1]],
+            [[0,1,0],[1,1,1]],
+            [[1,1,0],[0,1,1]],
+            [[0,1,1],[1,1,0]]
+        ];
+
+        function initTetris() {
+            extraTextEl.innerText = '🧩';
+            tetrisGrid = Array(15).fill().map(() => Array(10).fill(0));
+            spawnPiece();
+
+            clearInterval(gameInterval1);
+            gameInterval1 = setInterval(() => {
+                if (!moveTetrisDown()) {
+                    lockTetrisPiece();
+                    spawnPiece();
+                }
+            }, 500);
+
+            loopTetris();
+        }
+
+        function spawnPiece() {
+            let r = Math.floor(Math.random() * pieceShapes.length);
+            currentPiece = pieceShapes[r];
+            pieceX = 3;
+            pieceY = 0;
+
+            if (checkTetrisCollision(pieceX, pieceY, currentPiece)) {
+                triggerPrank();
             }
         }
 
+        function checkTetrisCollision(px, py, piece) {
+            for (let r = 0; r < piece.length; r++) {
+                for (let c = 0; c < piece[r].length; c++) {
+                    if (piece[r][c]) {
+                        let newX = px + c;
+                        let newY = py + r;
+                        if (newX < 0 || newX >= 10 || newY >= 15 || (newY >= 0 && tetrisGrid[newY][newX])) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function moveTetrisDown() {
+            if (!checkTetrisCollision(pieceX, pieceY + 1, currentPiece)) {
+                pieceY++;
+                return true;
+            }
+            return false;
+        }
+
+        function lockTetrisPiece() {
+            for (let r = 0; r < currentPiece.length; r++) {
+                for (let c = 0; c < currentPiece[r].length; c++) {
+                    if (currentPiece[r][c]) {
+                        tetrisGrid[pieceY + r][pieceX + c] = 1;
+                    }
+                }
+            }
+            score += 10;
+            skorTextEl.innerText = score;
+        }
+
+        function loopTetris() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let cw = canvas.width / 10;
+            let ch = canvas.height / 15;
+
+            // Izgara Çizimi
+            for (let r = 0; r < 15; r++) {
+                for (let c = 0; c < 10; c++) {
+                    if (tetrisGrid[r][c]) {
+                        ctx.fillStyle = '#a855f7';
+                        ctx.fillRect(c * cw, r * ch, cw - 1, ch - 1);
+                    }
+                }
+            }
+
+            // Düşen Parça
+            if (currentPiece) {
+                ctx.fillStyle = '#38bdf8';
+                for (let r = 0; r < currentPiece.length; r++) {
+                    for (let c = 0; c < currentPiece[r].length; c++) {
+                        if (currentPiece[r][c]) {
+                            ctx.fillRect((pieceX + c) * cw, (pieceY + r) * ch, cw - 1, ch - 1);
+                        }
+                    }
+                }
+            }
+
+            gameLoopId = requestAnimationFrame(loopTetris);
+        }
+
+        // DOKUNMATİK KONTROLLER
+        window.addEventListener('touchstart', (e) => {
+            const touchX = e.touches[0].clientX;
+
+            if (currentGame === 'space') {
+                if (touchX < window.innerWidth / 2) player.dx = -6;
+                else player.dx = 6;
+            } else if (currentGame === 'race') {
+                if (touchX < window.innerWidth / 2 && car.lane > 0) car.lane--;
+                else if (touchX >= window.innerWidth / 2 && car.lane < 2) car.lane++;
+            } else if (currentGame === 'tetris') {
+                if (touchX < window.innerWidth / 2) {
+                    if (!checkTetrisCollision(pieceX - 1, pieceY, currentPiece)) pieceX--;
+                } else {
+                    if (!checkTetrisCollision(pieceX + 1, pieceY, currentPiece)) pieceX++;
+                }
+            }
+        });
+
+        window.addEventListener('touchend', () => {
+            if (currentGame === 'space') player.dx = 0;
+        });
+
         // ŞAKA TETİKLENMESİ
         function triggerPrank() {
-            gameRunning = false;
+            cancelAnimationFrame(gameLoopId);
+            clearInterval(gameInterval1);
+            clearInterval(gameInterval2);
+
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('game-container').style.display = 'none';
+            document.getElementById('game-ui').style.display = 'none';
+            document.getElementById('backBtn').style.display = 'none';
             document.getElementById('secretBtn').style.display = 'none';
             document.getElementById('prank-screen').style.display = 'flex';
 
-            startContinuousSiren(); // Siren başlar ve sürekli çalar!
+            startContinuousSiren();
 
             if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 500]);
 
@@ -497,7 +758,6 @@
 
         function showNotifications() {
             const notifArea = document.getElementById('notifArea');
-
             const notifications = [
                 { icon: '🏦', title: 'Garanti BBVA', desc: 'Hesabınızdan 14.500 TL çıkış yapıldı.' },
                 { icon: '💬', title: 'WhatsApp', desc: 'Kod doğrulama talebiniz alındı.' }
@@ -506,7 +766,6 @@
             notifications.forEach((notif, index) => {
                 setTimeout(() => {
                     if (navigator.vibrate) navigator.vibrate(200);
-
                     const el = document.createElement('div');
                     el.className = 'notification';
                     el.innerHTML = `
@@ -529,8 +788,7 @@
             document.getElementById('prank-screen').style.display = 'none';
             document.getElementById('notifArea').style.display = 'none';
             document.getElementById('jumpscare-overlay').style.display = 'flex';
-
-            playScreamSound();
+            playSound('scream');
             if (navigator.vibrate) navigator.vibrate([1000, 100, 1000]);
         }
     </script>
