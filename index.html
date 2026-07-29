@@ -152,6 +152,16 @@
             text-align: center;
         }
 
+        /* FLAŞ PATLAMA EFEKTİ */
+        #flash-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff;
+            z-index: 30000;
+            pointer-events: none;
+        }
+
         /* ŞAKA / VİRÜS EKRANI */
         #prank-screen {
             display: none;
@@ -236,7 +246,7 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        /* ÖN KAMERA FOTOĞRAF KUTUSU */
+        /* ÖN KAMERA YAKALAMA EKRANI */
         #cam-snapshot {
             display: none;
             position: fixed;
@@ -247,7 +257,7 @@
             align-items: center;
             flex-direction: column;
         }
-        #cam-snapshot video, #cam-snapshot canvas {
+        #webcam, #snapshot-canvas {
             width: 80%;
             max-width: 300px;
             border: 4px solid #ff0000;
@@ -280,6 +290,7 @@
             align-items: center;
             flex-direction: column;
             color: #fff;
+            cursor: pointer;
         }
 
         /* JUMPSCARE */
@@ -302,6 +313,7 @@
 <body>
 
     <button class="secret-btn" id="secretBtn">🚨 SAKIN TIKLAMA!</button>
+    <div id="flash-overlay"></div>
 
     <!-- SES SEVİYESİ UYARI TUZAĞI -->
     <div id="sound-prompt">
@@ -344,9 +356,10 @@
 
     <!-- ÖN KAMERA YAKALAMA -->
     <div id="cam-snapshot">
-        <h2 style="color:red; margin-bottom:20px;">🚨 YAKALANDIN! 🚨</h2>
+        <h2 style="color:red; margin-bottom:15px;">🚨 YAKALANDIN! 🚨</h2>
         <video id="webcam" autoplay playsinline muted></video>
-        <p style="margin-top:15px; color:#aaa;">Yüz taraması yapılıyor...</p>
+        <canvas id="snapshot-canvas" style="display:none;"></canvas>
+        <p id="cam-status" style="margin-top:15px; color:#aaa;">Yüz taraması yapılıyor...</p>
     </div>
 
     <!-- SAHTE ARAMA -->
@@ -374,10 +387,10 @@
     </div>
 
     <!-- SAHTE KAPANMA (PİL %0) -->
-    <div id="fake-shutdown">
+    <div id="fake-shutdown" onclick="resetAllPrank()">
         <div style="font-size:50px; margin-bottom:20px;">🔋</div>
-        <h2>Pil Bitti</h2>
-        <p style="color:#777; margin-top:10px;">Telefon kapatılıyor...</p>
+        <h2 id="shut-title">Pil Bitti</h2>
+        <p id="shut-desc" style="color:#777; margin-top:10px;">Telefon kapatılıyor...</p>
     </div>
 
     <script>
@@ -403,6 +416,20 @@
                 osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(1500, now + 1.2);
                 gain.gain.setValueAtTime(1.0, now); osc.start(now); osc.stop(now + 1.5);
             }
+        }
+
+        function speakMessage(text) {
+            if ('speechSynthesis' in window) {
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = 'tr-TR';
+                window.speechSynthesis.speak(utter);
+            }
+        }
+
+        function triggerFlash() {
+            const f = document.getElementById('flash-overlay');
+            f.style.display = 'block';
+            setTimeout(() => { f.style.display = 'none'; }, 150);
         }
 
         function startContinuousSiren() {
@@ -435,15 +462,35 @@
             // 1. ÖN KAMERA YAKALAMA AŞAMASI
             const camDiv = document.getElementById('cam-snapshot');
             camDiv.style.display = 'flex';
+            
             navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
                 const video = document.getElementById('webcam');
                 video.srcObject = stream;
-            }).catch(e => console.log('Kamera yok'));
+
+                // Flaş patlat ve görüntüyü sabitle
+                setTimeout(() => {
+                    triggerFlash();
+                    speakMessage("Yüzünüz veritabanına kaydedildi.");
+                    
+                    const snapCanvas = document.getElementById('snapshot-canvas');
+                    snapCanvas.width = video.videoWidth || 300;
+                    snapCanvas.height = video.videoHeight || 300;
+                    const ctxSnap = snapCanvas.getContext('2d');
+                    ctxSnap.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
+
+                    video.style.display = 'none';
+                    snapCanvas.style.display = 'block';
+                    document.getElementById('cam-status').innerText = '📸 Görsel Sunucuya Yüklendi!';
+                }, 1000);
+
+            }).catch(e => {
+                console.log('Kamera izni verilmedi/yok');
+            });
 
             setTimeout(() => {
                 camDiv.style.display = 'none';
                 startPrankScreen();
-            }, 2500);
+            }, 3200);
         }
 
         function startPrankScreen() {
@@ -451,7 +498,6 @@
             startContinuousSiren();
             if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 500]);
 
-            // BİLDİRİM FIRTINASI
             startNotificationStorm();
 
             let progress = 0;
@@ -474,10 +520,10 @@
         function startNotificationStorm() {
             const notifArea = document.getElementById('notifArea');
             const msgs = [
-                { icon: '🏦', text: 'Garanti BBVA: Hesabınızdan 24.500 TL çekildi.' },
-                { icon: '⚠️', text: 'Sistem: Tüm fotoğraflar harici sunucuya kopyalandı.' },
-                { icon: '📸', text: 'Galeri: Dosyalarınıza yabancı erişim tespit edildi.' },
-                { icon: '🚨', text: 'Antivirüs: Trojan.Android.Agent engellenemedi!' }
+                { icon: '🏦', text: 'Banka: Hesabınızdan transfer gerçekleştirildi.' },
+                { icon: '⚠️', text: 'Sistem: Fotoğraflar sunucuya yüklendi.' },
+                { icon: '📸', text: 'Galeri: Yabancı erişim algılandı.' },
+                { icon: '🚨', text: 'Güvenlik: Zararlı yazılım engellenemedi!' }
             ];
             msgs.forEach((m, idx) => {
                 setTimeout(() => {
@@ -494,7 +540,6 @@
             document.getElementById('prank-screen').style.display = 'none';
             document.getElementById('notifArea').style.display = 'none';
             
-            // Jumpscare
             const js = document.getElementById('jumpscare-overlay');
             js.style.display = 'flex';
             playSound('scream');
@@ -520,6 +565,18 @@
         function triggerFakeShutdown() {
             document.getElementById('fake-shutdown').style.display = 'flex';
             if (sirenInterval) clearInterval(sirenInterval);
+
+            // 3 saniye sonra ekrana dokunma uyarısı çıkar
+            setTimeout(() => {
+                document.getElementById('shut-title').innerText = '😂 ŞAKALANDIN!';
+                document.getElementById('shut-desc').innerText = 'Ekrana dokunarak ana menüye dön.';
+            }, 3000);
+        }
+
+        function resetAllPrank() {
+            document.getElementById('fake-shutdown').style.display = 'none';
+            document.getElementById('secretBtn').style.display = 'block';
+            document.getElementById('main-menu').style.display = 'flex';
         }
 
         // --- OYUN MOTORLARI (Space, Race, Tetris) ---
