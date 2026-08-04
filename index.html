@@ -3,8 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobil Oyun Merkezi</title>
+    <title>Mobil Oyun Arcade - Part 1</title>
     <style>
+        /* ==========================================================================
+           1. GENEL RESET VE TEMEL DEĞİŞKENLER
+           ========================================================================== */
+        :root {
+            --bg-primary: #090d16;
+            --bg-secondary: #0f172a;
+            --bg-card: #1e293b;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -12,26 +29,32 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
             min-height: 100vh;
             overflow-x: hidden;
+            line-height: 1.5;
         }
 
+        /* ==========================================================================
+           2. HEADER VE SKOR PANOSU
+           ========================================================================== */
         header {
             width: 100%;
-            padding: 15px;
-            background-color: #1e293b;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            border-bottom: 2px solid var(--border-color);
             text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -39,60 +62,88 @@
 
         h1 {
             font-size: 1.4rem;
-            color: #38bdf8;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+            text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+            font-weight: 800;
         }
 
         .score-board {
-            font-size: 0.9rem;
-            color: #94a3b8;
-            margin-top: 4px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            font-weight: 600;
         }
 
-        .container {
+        .score-board span {
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+
+        .main-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 480px;
             padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            flex-grow: 1;
         }
 
-        /* MENÜ BÖLÜMÜ */
+        /* ==========================================================================
+           3. MENÜ YAPISI VE KARTLAR
+           ========================================================================== */
         .menu-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
             width: 100%;
             margin-top: 10px;
         }
 
         .game-card {
-            background-color: #1e293b;
-            border: 2px solid #334155;
-            border-radius: 12px;
-            padding: 20px 10px;
+            background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px 12px;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.1s, border-color 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .game-card:active {
-            transform: scale(0.96);
-            border-color: #38bdf8;
+            transform: scale(0.95);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.3);
+        }
+
+        .game-card .icon {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
         }
 
         .game-card h3 {
-            font-size: 1.1rem;
-            margin-bottom: 6px;
-            color: #f1f5f9;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            margin-bottom: 4px;
         }
 
         .game-card p {
             font-size: 0.75rem;
-            color: #64748b;
+            color: var(--text-muted);
         }
 
-        /* OYUN ALANI */
+        /* ==========================================================================
+           4. OYUN EKRANI VE CANVAS
+           ========================================================================== */
         .game-view {
             display: none;
             width: 100%;
@@ -109,59 +160,71 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .back-btn {
-            background-color: #334155;
-            color: #fff;
+            background-color: var(--border-color);
+            color: var(--text-main);
             border: none;
             padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: bold;
+            border-radius: 10px;
+            font-weight: 600;
             font-size: 0.85rem;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        canvas {
-            background-color: #000;
-            border-radius: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            max-width: 100%;
+        .back-btn:active {
+            background-color: #475569;
+        }
+
+        #gameCanvas {
+            background-color: #020617;
+            border: 2px solid var(--bg-card);
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
             touch-action: none;
+            width: 320px;
+            height: 320px;
         }
 
-        /* MOBİL DOKUNMATİK KONTROLLER */
+        /* ==========================================================================
+           5. MOBİL DOKUNMATİK KONTROLLER
+           ========================================================================== */
         .touch-controls {
             margin-top: 15px;
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .d-pad {
             display: grid;
-            grid-template-columns: repeat(3, 55px);
-            grid-template-rows: repeat(3, 55px);
-            gap: 5px;
+            grid-template-columns: repeat(3, 58px);
+            grid-template-rows: repeat(3, 58px);
+            gap: 6px;
         }
 
         .btn-ctrl {
-            background-color: #334155;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.2rem;
-            font-weight: bold;
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-secondary));
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            font-size: 1.3rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            cursor: pointer;
         }
 
         .btn-ctrl:active {
-            background-color: #38bdf8;
-            color: #0f172a;
+            background: var(--accent-color);
+            color: var(--bg-primary);
+            transform: scale(0.92);
         }
 
         .btn-up { grid-column: 2; grid-row: 1; }
@@ -171,128 +234,165 @@
 
         .action-row {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
+            gap: 15px;
             width: 100%;
-            margin-top: 5px;
         }
 
         .btn-action {
-            background-color: #0284c7;
+            background: linear-gradient(135deg, var(--accent-hover) 0%, #0369a1 100%);
             color: white;
             border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
+            padding: 14px 28px;
+            border-radius: 30px;
             font-size: 1rem;
             font-weight: bold;
-            width: 45%;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+            width: 80%;
+            text-align: center;
         }
 
         .btn-action:active {
-            background-color: #38bdf8;
+            transform: scale(0.95);
+            background: var(--accent-color);
         }
 
-        /* 2048 VE HAFIZA OYUNU İÇİN İLAVE IZGARA STİLLERİ */
-        .grid-container {
+        /* ==========================================================================
+           6. HTML GRID TABANLI OYUN STİLLERİ
+           ========================================================================== */
+        .custom-grid {
             display: grid;
             gap: 8px;
-            background-color: #1e293b;
-            padding: 10px;
-            border-radius: 8px;
+            background-color: var(--bg-secondary);
+            padding: 12px;
+            border-radius: 14px;
             width: 320px;
             height: 320px;
+            border: 2px solid var(--bg-card);
         }
 
         .memory-card {
-            background-color: #334155;
-            border-radius: 6px;
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-secondary));
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.8rem;
             cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .tile-2048 {
-            background-color: #334155;
-            border-radius: 4px;
+            background-color: var(--bg-card);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             font-size: 1.2rem;
-            color: #f8fafc;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Mobil Oyun Merkezi</h1>
-        <div class="score-board">Toplam Puan: <span id="total-score">0</span></div>
+        <h1>Mobil Oyun Portalı</h1>
+        <div class="score-board">
+            <div>Toplam Skor: <span id="total-score">0</span></div>
+            <div>En Yüksek Skor: <span id="high-score">0</span></div>
+        </div>
     </header>
 
-    <div class="container">
-        <!-- ANA MENÜ -->
+    <div class="main-container">
+        <!-- ANA MENÜ GRID -->
         <div id="main-menu" class="menu-grid">
             <div class="game-card" onclick="openGame('snake')">
-                <h3>🐍 Yılan</h3>
+                <div class="icon">🐍</div>
+                <h3>Yılan</h3>
                 <p>Klasik Yılan Oyunu</p>
             </div>
             <div class="game-card" onclick="openGame('pong')">
-                <h3>🏓 Pong</h3>
+                <div class="icon">🏓</div>
+                <h3>Pong</h3>
                 <p>Dokunmatik Raket</p>
             </div>
             <div class="game-card" onclick="openGame('flappy')">
-                <h3>🐤 Flappy</h3>
-                <p>Engel Geçme</p>
+                <div class="icon">🐤</div>
+                <h3>Flappy Bird</h3>
+                <p>Dokun & Zıpla</p>
             </div>
             <div class="game-card" onclick="openGame('invaders')">
-                <h3>👾 Uzay Savaşı</h3>
-                <p>Düşmanları Yok Et</p>
+                <div class="icon">👾</div>
+                <h3>Uzay Savaşı</h3>
+                <p>Uzaylıları Yok Et</p>
             </div>
             <div class="game-card" onclick="openGame('memory')">
-                <h3>🎴 Hafıza Kartı</h3>
-                <p>Eşleri Bul</p>
+                <div class="icon">🎴</div>
+                <h3>Hafıza Oyunu</h3>
+                <p>Kartları Eşleştir</p>
             </div>
             <div class="game-card" onclick="openGame('g2048')">
-                <h3>🔢 2048</h3>
-                <p>Sayıları Birleştir</p>
+                <div class="icon">🔢</div>
+                <h3>2048</h3>
+                <p>Kaydır & Birleştir</p>
+            </div>
+            <div class="game-card" onclick="openGame('breakout')">
+                <div class="icon">🧱</div>
+                <h3>Tuğla Kırma</h3>
+                <p>Tüm Tuğlaları Yok Et</p>
+            </div>
+            <div class="game-card" onclick="openGame('dodge')">
+                <div class="icon">🚗</div>
+                <h3>Araba Kaçış</h3>
+                <p>Engellerden Kaç</p>
             </div>
         </div>
 
-        <!-- OYUN ALANI (CANVAS + KONTROLLER) -->
+        <!-- OYUN ALANI -->
         <div id="game-view" class="game-view">
             <div class="game-header">
-                <button class="back-btn" onclick="closeGame()">← Menü</button>
-                <h2 id="game-title" style="font-size: 1.1rem;">Oyun</h2>
+                <button class="back-btn" onclick="closeGame()">← Ana Menü</button>
+                <h2 id="game-title" style="font-size: 1.1rem; color: var(--accent-color);">Oyun</h2>
             </div>
 
+            <!-- CANVAS OYUN TİPLERİ İÇİN -->
             <canvas id="gameCanvas" width="320" height="320"></canvas>
-            <div id="custom-html-game" class="grid-container" style="display:none;"></div>
+            
+            <!-- HTML/GRID OYUN TİPLERİ İÇİN -->
+            <div id="custom-html-game" class="custom-grid" style="display:none;"></div>
 
-            <!-- DOKUNMATİK D-PAD (Yılan, Space Invaders vb. için) -->
+            <!-- MOBİL YÖN KONTROLLERİ -->
             <div id="controls-dpad" class="touch-controls" style="display:none;">
                 <div class="d-pad">
-                    <button class="btn-ctrl btn-up" onclick="handleInput('UP')">▲</button>
-                    <button class="btn-ctrl btn-left" onclick="handleInput('LEFT')">◄</button>
-                    <button class="btn-ctrl btn-right" onclick="handleInput('RIGHT')">►</button>
-                    <button class="btn-ctrl btn-down" onclick="handleInput('DOWN')">▼</button>
+                    <button class="btn-ctrl btn-up" onclick="triggerInput('UP')">▲</button>
+                    <button class="btn-ctrl btn-left" onclick="triggerInput('LEFT')">◄</button>
+                    <button class="btn-ctrl btn-right" onclick="triggerInput('RIGHT')">►</button>
+                    <button class="btn-ctrl btn-down" onclick="triggerInput('DOWN')">▼</button>
                 </div>
             </div>
 
-            <!-- TEK BUTONLU DOKUNMA (Flappy, Space Invaders Ateş) -->
+            <!-- MOBİL AKSİYON BUTONLARI -->
             <div id="controls-action" class="touch-controls" style="display:none;">
                 <div class="action-row">
-                    <button class="btn-action" id="action-btn-1" onclick="handleInput('ACTION')">ATEŞ / ZIPLA</button>
+                    <button class="btn-action" id="action-btn" onclick="triggerInput('ACTION')">ATEŞ / ZIPLA</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // GLOBAL DEĞİŞKENLER VE SKOR
-        let totalScore = parseInt(localStorage.getItem('center_total_score')) || 0;
+        /* ==========================================================================
+           7. MİMARİ VE GLOBAL SKOR YÖNETİMİ
+           ========================================================================== */
+        let totalScore = parseInt(localStorage.getItem('arcade_total_score')) || 0;
+        let highScore = parseInt(localStorage.getItem('arcade_high_score')) || 0;
+
         document.getElementById('total-score').innerText = totalScore;
+        document.getElementById('high-score').innerText = highScore;
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -303,7 +403,12 @@
 
         function addScore(points) {
             totalScore += points;
-            localStorage.setItem('center_total_score', totalScore);
+            if (totalScore > highScore) {
+                highScore = totalScore;
+                localStorage.setItem('arcade_high_score', highScore);
+                document.getElementById('high-score').innerText = highScore;
+            }
+            localStorage.setItem('arcade_total_score', totalScore);
             document.getElementById('total-score').innerText = totalScore;
         }
 
@@ -311,7 +416,6 @@
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('game-view').classList.add('active');
             
-            // Kontrolleri Sıfırla
             document.getElementById('controls-dpad').style.display = 'none';
             document.getElementById('controls-action').style.display = 'none';
             canvas.style.display = 'block';
@@ -327,7 +431,7 @@
                 document.getElementById('game-title').innerText = 'Pong';
                 initPong();
             } else if (gameKey === 'flappy') {
-                document.getElementById('game-title').innerText = 'Flappy';
+                document.getElementById('game-title').innerText = 'Flappy Bird';
                 document.getElementById('controls-action').style.display = 'flex';
                 initFlappy();
             } else if (gameKey === 'invaders') {
@@ -345,6 +449,13 @@
                 canvas.style.display = 'none';
                 customGameArea.style.display = 'grid';
                 init2048();
+            } else if (gameKey === 'breakout') {
+                document.getElementById('game-title').innerText = 'Tuğla Kırma';
+                initBreakout();
+            } else if (gameKey === 'dodge') {
+                document.getElementById('game-title').innerText = 'Araba Kaçış';
+                document.getElementById('controls-dpad').style.display = 'flex';
+                initDodge();
             }
         }
 
@@ -355,19 +466,19 @@
             currentGame = null;
         }
 
-        function handleInput(key) {
+        function triggerInput(key) {
             if (currentGame === 'snake' && snakeInput) snakeInput(key);
             if (currentGame === 'flappy' && flappyInput) flappyInput();
             if (currentGame === 'invaders' && invadersInput) invadersInput(key);
+            if (currentGame === 'dodge' && dodgeInput) dodgeInput(key);
         }
 
-        // =========================================================
-        // 1. YILAN OYUNU
-        // =========================================================
+        /* ==========================================================================
+           8. OYUN 1: YILAN (SNAKE)
+           ========================================================================== */
         let snakeInput = null;
         function initSnake() {
             let grid = 16;
-            let count = 0;
             let snake = [{x: 160, y: 160}, {x: 144, y: 160}];
             let dx = grid, dy = 0;
             let food = {x: 80, y: 80};
@@ -379,22 +490,34 @@
                 if (dir === 'RIGHT' && dx === 0) { dx = grid; dy = 0; }
             };
 
+            let tsX = 0, tsY = 0;
+            canvas.ontouchstart = e => { tsX = e.touches[0].clientX; tsY = e.touches[0].clientY; };
+            canvas.ontouchend = e => {
+                let dxTouch = e.changedTouches[0].clientX - tsX;
+                let dyTouch = e.changedTouches[0].clientY - tsY;
+                if (Math.abs(dxTouch) > Math.abs(dyTouch)) {
+                    if (dxTouch > 20) snakeInput('RIGHT');
+                    else if (dxTouch < -20) snakeInput('LEFT');
+                } else {
+                    if (dyTouch > 20) snakeInput('DOWN');
+                    else if (dyTouch < -20) snakeInput('UP');
+                }
+            };
+
             if (gameLoopId) clearInterval(gameLoopId);
             gameLoopId = setInterval(function() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 let head = {x: snake[0].x + dx, y: snake[0].y + dy};
 
-                // Duvar Sınırları
                 if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
                     alert("Oyun Bitti!");
                     initSnake();
                     return;
                 }
 
-                // Kendiyle Çarpışma
-                for(let i=0; i<snake.length; i++) {
-                    if(head.x === snake[i].x && head.y === snake[i].y) {
+                for (let i = 0; i < snake.length; i++) {
+                    if (head.x === snake[i].x && head.y === snake[i].y) {
                         alert("Oyun Bitti!");
                         initSnake();
                         return;
@@ -403,7 +526,6 @@
 
                 snake.unshift(head);
 
-                // Yem Yeme
                 if (head.x === food.x && head.y === food.y) {
                     addScore(10);
                     food = {
@@ -414,27 +536,25 @@
                     snake.pop();
                 }
 
-                // Çizim
                 ctx.fillStyle = '#ef4444';
-                ctx.fillRect(food.x, food.y, grid-1, grid-1);
+                ctx.fillRect(food.x, food.y, grid - 1, grid - 1);
 
                 ctx.fillStyle = '#22c55e';
                 snake.forEach(segment => {
-                    ctx.fillRect(segment.x, segment.y, grid-1, grid-1);
+                    ctx.fillRect(segment.x, segment.y, grid - 1, grid - 1);
                 });
             }, 120);
         }
 
-        // =========================================================
-        // 2. PONG OYUNU
-        // =========================================================
+        /* ==========================================================================
+           9. OYUN 2: PONG
+           ========================================================================== */
         function initPong() {
             let paddleWidth = 70, paddleHeight = 10;
             let playerX = (canvas.width - paddleWidth) / 2;
             let ballX = canvas.width / 2, ballY = canvas.height / 2;
             let ballDX = 3, ballDY = -3;
 
-            // Dokunma ile Raket Kontrolü
             canvas.ontouchmove = function(e) {
                 let rect = canvas.getBoundingClientRect();
                 let touchX = e.touches[0].clientX - rect.left;
@@ -448,25 +568,20 @@
                 ballX += ballDX;
                 ballY += ballDY;
 
-                // Yan Duvarlar
                 if (ballX <= 0 || ballX >= canvas.width) ballDX *= -1;
-                // Üst Duvar
                 if (ballY <= 0) ballDY *= -1;
 
-                // Raket Teması
                 if (ballY >= canvas.height - paddleHeight - 5 && ballX >= playerX && ballX <= playerX + paddleWidth) {
                     ballDY *= -1;
                     addScore(5);
                 }
 
-                // Alt Tabandan Düşme
                 if (ballY >= canvas.height) {
                     alert("Kaybettiniz!");
                     initPong();
                     return;
                 }
 
-                // Çizim
                 ctx.fillStyle = '#38bdf8';
                 ctx.fillRect(playerX, canvas.height - paddleHeight - 5, paddleWidth, paddleHeight);
 
@@ -474,22 +589,19 @@
                 ctx.beginPath();
                 ctx.arc(ballX, ballY, 6, 0, Math.PI * 2);
                 ctx.fill();
-            }, 1000/60);
+            }, 1000 / 60);
         }
 
-        // =========================================================
-        // 3. FLAPPY BIRD OYUNU
-        // =========================================================
+        /* ==========================================================================
+           10. OYUN 3: FLAPPY BIRD
+           ========================================================================== */
         let flappyInput = null;
         function initFlappy() {
             let birdY = 150, velocity = 0, gravity = 0.25;
             let pipes = [];
             let frame = 0;
 
-            flappyInput = function() {
-                velocity = -4.5;
-            };
-
+            flappyInput = function() { velocity = -4.5; };
             canvas.onclick = flappyInput;
 
             if (gameLoopId) clearInterval(gameLoopId);
@@ -506,7 +618,6 @@
                     pipes.push({ x: canvas.width, top: topHeight, bottom: canvas.height - topHeight - gap });
                 }
 
-                // Boruları Güncelle ve Çiz
                 ctx.fillStyle = '#22c55e';
                 for (let i = 0; i < pipes.length; i++) {
                     let p = pipes[i];
@@ -515,7 +626,6 @@
                     ctx.fillRect(p.x, 0, 30, p.top);
                     ctx.fillRect(p.x, canvas.height - p.bottom, 30, p.bottom);
 
-                    // Çarpışma Tespiti
                     if (p.x < 40 && p.x + 30 > 20) {
                         if (birdY < p.top || birdY > canvas.height - p.bottom) {
                             alert("Oyun Bitti!");
@@ -527,7 +637,6 @@
                     if (p.x === 20) addScore(10);
                 }
 
-                // Kuşu Çiz
                 ctx.fillStyle = '#eab308';
                 ctx.beginPath();
                 ctx.arc(30, birdY, 8, 0, Math.PI * 2);
@@ -537,104 +646,109 @@
                     alert("Oyun Bitti!");
                     initFlappy();
                 }
-            }, 1000/60);
+            }, 1000 / 60);
         }
-
-        // =========================================================
-        // 4. UZAY SAVAŞI (SPACE INVADERS)
-        // =========================================================
+                /* ==========================================================================
+           11. OYUN 4: SPACE INVADERS (UZAY SAVAŞI)
+           ========================================================================== */
         let invadersInput = null;
         function initInvaders() {
-            let playerX = 145;
+            let playerX = canvas.width / 2 - 15;
             let bullets = [];
             let enemies = [];
-            
-            for(let r=0; r<3; r++) {
-                for(let c=0; c<5; c++) {
-                    enemies.push({x: 30 + c*50, y: 20 + r*30, alive: true});
+            let enemyRows = 3, enemyCols = 6;
+            let enemyDirection = 1;
+
+            for (let r = 0; r < enemyRows; r++) {
+                for (let c = 0; c < enemyCols; c++) {
+                    enemies.push({ x: c * 45 + 20, y: r * 30 + 30, alive: true });
                 }
             }
 
-            invadersInput = function(action) {
-                if(action === 'LEFT' && playerX > 0) playerX -= 15;
-                if(action === 'RIGHT' && playerX < canvas.width - 30) playerX += 15;
-                if(action === 'ACTION') bullets.push({x: playerX + 12, y: canvas.height - 30});
+            invadersInput = function(dir) {
+                if (dir === 'LEFT' && playerX > 0) playerX -= 15;
+                if (dir === 'RIGHT' && playerX < canvas.width - 30) playerX += 15;
+                if (dir === 'ACTION') bullets.push({ x: playerX + 13, y: canvas.height - 30 });
             };
 
             if (gameLoopId) clearInterval(gameLoopId);
             gameLoopId = setInterval(function() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                // Oyuncu
+                // Oyuncu Çizimi
                 ctx.fillStyle = '#38bdf8';
                 ctx.fillRect(playerX, canvas.height - 20, 30, 10);
 
                 // Mermiler
-                ctx.fillStyle = '#ef4444';
-                for(let i=0; i<bullets.length; i++) {
-                    let b = bullets[i];
-                    b.y -= 5;
-                    ctx.fillRect(b.x, b.y, 4, 8);
+                ctx.fillStyle = '#f59e0b';
+                for (let i = bullets.length - 1; i >= 0; i--) {
+                    bullets[i].y -= 5;
+                    ctx.fillRect(bullets[i].x, bullets[i].y, 4, 8);
 
-                    // Düşman Vurma Tespiti
-                    enemies.forEach(e => {
-                        if(e.alive && b.x > e.x && b.x < e.x + 30 && b.y > e.y && b.y < e.y + 20) {
-                            e.alive = false;
-                            b.y = -10;
-                            addScore(15);
-                        }
-                    });
+                    if (bullets[i].y < 0) bullets.splice(i, 1);
                 }
 
                 // Düşmanlar
-                ctx.fillStyle = '#a855f7';
-                let allDead = true;
+                let changeDir = false;
+                ctx.fillStyle = '#ef4444';
                 enemies.forEach(e => {
-                    if(e.alive) {
-                        allDead = false;
-                        ctx.fillRect(e.x, e.y, 30, 20);
-                    }
+                    if (!e.alive) return;
+                    ctx.fillRect(e.x, e.y, 25, 18);
+
+                    if (e.x + 25 >= canvas.width || e.x <= 0) changeDir = true;
+
+                    // Mermi ile Çarpışma
+                    bullets.forEach((b, bIdx) => {
+                        if (b.x > e.x && b.x < e.x + 25 && b.y > e.y && b.y < e.y + 18) {
+                            e.alive = false;
+                            bullets.splice(bIdx, 1);
+                            addScore(15);
+                        }
+                    });
                 });
 
-                if(allDead) {
-                    alert("Zafer! Tüm uzaylılar temizlendi.");
-                    initInvaders();
+                if (changeDir) {
+                    enemyDirection *= -1;
+                    enemies.forEach(e => e.y += 10);
                 }
-            }, 1000/60);
+
+                enemies.forEach(e => {
+                    if (e.alive) e.x += enemyDirection * 1;
+                });
+            }, 1000 / 60);
         }
 
-        // =========================================================
-        // 5. HAFIZA KARTLARI
-        // =========================================================
+        /* ==========================================================================
+           12. OYUN 5: HAFIZA KARTLARI (MEMORY)
+           ========================================================================== */
         function initMemory() {
             customGameArea.style.gridTemplateColumns = 'repeat(4, 1fr)';
             customGameArea.innerHTML = '';
             
-            let symbols = ['🍎', '🍌', '🍇', '🍓', '🍒', '🍍', '🥝', '🍉'];
-            let deck = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
-            let selected = [];
+            const icons = ['🍕', '🥊', '🚀', '🎸', '🍕', '🥊', '🚀', '🎸'];
+            let shuffled = icons.sort(() => 0.5 - Math.random());
+            let flippedCards = [];
 
-            deck.forEach((sym, idx) => {
+            shuffled.forEach((icon, index) => {
                 let card = document.createElement('div');
                 card.className = 'memory-card';
-                card.dataset.symbol = sym;
-                card.dataset.index = idx;
+                card.dataset.icon = icon;
+                card.innerText = '❓';
                 card.onclick = function() {
-                    if (selected.length < 2 && !card.innerText) {
-                        card.innerText = sym;
-                        selected.push(card);
+                    if (flippedCards.length < 2 && this.innerText === '❓') {
+                        this.innerText = icon;
+                        flippedCards.push(this);
 
-                        if (selected.length === 2) {
-                            if (selected[0].dataset.symbol === selected[1].dataset.symbol) {
-                                addScore(20);
-                                selected = [];
-                            } else {
-                                setTimeout(() => {
-                                    selected[0].innerText = '';
-                                    selected[1].innerText = '';
-                                    selected = [];
-                                }, 800);
-                            }
+                        if (flippedCards.length === 2) {
+                            setTimeout(() => {
+                                if (flippedCards[0].dataset.icon === flippedCards[1].dataset.icon) {
+                                    addScore(20);
+                                } else {
+                                    flippedCards[0].innerText = '❓';
+                                    flippedCards[1].innerText = '❓';
+                                }
+                                flippedCards = [];
+                            }, 600);
                         }
                     }
                 };
@@ -642,61 +756,717 @@
             });
         }
 
-        // =========================================================
-        // 6. 2048 OYUNU (SWIPE DESTEKLİ)
-        // =========================================================
+        /* ==========================================================================
+           13. OYUN 6: 2048
+           ========================================================================== */
         function init2048() {
             customGameArea.style.gridTemplateColumns = 'repeat(4, 1fr)';
             customGameArea.innerHTML = '';
-            let board = Array(16).fill(0);
+            let board = [
+                [0, 0, 0, 0],
+                [0, 2, 0, 0],
+                [0, 0, 4, 0],
+                [0, 0, 0, 0]
+            ];
 
-            function addRandom() {
-                let empty = board.map((v, i) => v === 0 ? i : null).filter(v => v !== null);
-                if (empty.length > 0) {
-                    let idx = empty[Math.floor(Math.random() * empty.length)];
-                    board[idx] = Math.random() < 0.9 ? 2 : 4;
-                }
-            }
-
-            function render() {
+            function renderBoard() {
                 customGameArea.innerHTML = '';
-                board.forEach(val => {
-                    let tile = document.createElement('div');
-                    tile.className = 'tile-2048';
-                    tile.innerText = val > 0 ? val : '';
-                    if(val > 0) tile.style.backgroundColor = '#0284c7';
-                    customGameArea.appendChild(tile);
-                });
-            }
-
-            // Basit Swipe Tespiti
-            let touchStartX = 0, touchStartY = 0;
-            customGameArea.ontouchstart = e => {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-            };
-
-            customGameArea.ontouchend = e => {
-                let dx = e.changedTouches[0].clientX - touchStartX;
-                let dy = e.changedTouches[0].clientY - touchStartY;
-                
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    if (dx > 30) move2048('RIGHT');
-                    else if (dx < -30) move2048('LEFT');
+                for (let r = 0; r < 4; r++) {
+                    for (let c = 0; c < 4; c++) {
+                        let tile = document.createElement('div');
+                        tile.className = 'tile-2048';
+                        tile.innerText = board[r][c] === 0 ? '' : board[r][c];
+                        if (board[r][c] > 0) tile.style.backgroundColor = '#0284c7';
+                        customGameArea.appendChild(tile);
+                    }
                 }
-            };
+            }
+            renderBoard();
+        }
 
-            function move2048(dir) {
-                // Basit kaydırma ve skor ekleme
-                addRandom();
-                addScore(4);
-                render();
+        /* ==========================================================================
+           14. OYUN 7: TUĞLA KIRMA (BREAKOUT)
+           ========================================================================== */
+        function initBreakout() {
+            let paddleWidth = 75, paddleHeight = 10;
+            let paddleX = (canvas.width - paddleWidth) / 2;
+            let x = canvas.width / 2, y = canvas.height - 30;
+            let dx = 2, dy = -2;
+            let brickRowCount = 3, brickColumnCount = 5;
+            let brickWidth = 55, brickHeight = 15, brickPadding = 6, brickOffsetTop = 30, brickOffsetLeft = 10;
+
+            let bricks = [];
+            for (let c = 0; c < brickColumnCount; c++) {
+                bricks[c] = [];
+                for (let r = 0; r < brickRowCount; r++) {
+                    bricks[c][r] = { x: 0, y: 0, status: 1 };
+                }
             }
 
-            addRandom();
-            addRandom();
-            render();
+            canvas.ontouchmove = function(e) {
+                let rect = canvas.getBoundingClientRect();
+                paddleX = (e.touches[0].clientX - rect.left) - paddleWidth / 2;
+            };
+
+            if (gameLoopId) clearInterval(gameLoopId);
+            gameLoopId = setInterval(function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (let c = 0; c < brickColumnCount; c++) {
+                    for (let r = 0; r < brickRowCount; r++) {
+                        let b = bricks[c][r];
+                        if (b.status === 1) {
+                            let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                            let brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
+                            b.x = brickX; b.y = brickY;
+                            ctx.fillStyle = '#f59e0b';
+                            ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+
+                            if (x > brickX && x < brickX + brickWidth && y > brickY && y < brickY + brickHeight) {
+                                dy = -dy;
+                                b.status = 0;
+                                addScore(10);
+                            }
+                        }
+                    }
+                }
+
+                if (x + dx > canvas.width - 8 || x + dx < 8) dx = -dx;
+                if (y + dy < 8) dy = -dy;
+                else if (y + dy > canvas.height - 15) {
+                    if (x > paddleX && x < paddleX + paddleWidth) dy = -dy;
+                    else {
+                        alert("Oyun Bitti!");
+                        initBreakout();
+                        return;
+                    }
+                }
+
+                x += dx; y += dy;
+                ctx.fillStyle = '#22c55e';
+                ctx.fillRect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill();
+            }, 1000 / 60);
+        }
+
+        /* ==========================================================================
+           15. OYUN 8: ARABA KAÇIŞ (DODGE)
+           ========================================================================== */
+        let dodgeInput = null;
+        function initDodge() {
+            let playerX = 140;
+            let obstacles = [];
+
+            dodgeInput = function(dir) {
+                if (dir === 'LEFT' && playerX > 20) playerX -= 40;
+                if (dir === 'RIGHT' && playerX < 260) playerX += 40;
+            };
+
+            if (gameLoopId) clearInterval(gameLoopId);
+            gameLoopId = setInterval(function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (Math.random() < 0.05) {
+                    obstacles.push({ x: Math.floor(Math.random() * 7) * 40 + 20, y: 0 });
+                }
+
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillRect(playerX, canvas.height - 40, 30, 30);
+
+                ctx.fillStyle = '#ef4444';
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    let obs = obstacles[i];
+                    obs.y += 4;
+                    ctx.fillRect(obs.x, obs.y, 30, 30);
+
+                    // Çarpışma Testi
+                    if (obs.y > canvas.height - 40 && obs.y < canvas.height && obs.x === playerX) {
+                        alert("Kaza Yaptınız!");
+                        initDodge();
+                        return;
+                    }
+
+                    if (obs.y > canvas.height) {
+                        obstacles.splice(i, 1);
+                        addScore(5);
+                    }
+                }
+            }, 1000 / 60);
         }
     </script>
 </body>
 </html>
+        /* ==========================================================================
+           16. OYUN 9: TETRIS
+           ========================================================================== */
+        let tetrisInput = null;
+        function initTetris() {
+            const ROWS = 16, COLS = 10;
+            const BLOCK_SIZE = 20;
+            let board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+            
+            const SHAPES = [
+                [[1, 1, 1, 1]], // I
+                [[1, 1], [1, 1]], // O
+                [[0, 1, 0], [1, 1, 1]], // T
+                [[1, 0, 0], [1, 1, 1]], // L
+                [[0, 0, 1], [1, 1, 1]]  // J
+            ];
+
+            let currentPiece = {
+                shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
+                x: 3,
+                y: 0
+            };
+
+            tetrisInput = function(dir) {
+                if (dir === 'LEFT' && !checkCollision(-1, 0)) currentPiece.x--;
+                if (dir === 'RIGHT' && !checkCollision(1, 0)) currentPiece.x++;
+                if (dir === 'DOWN' && !checkCollision(0, 1)) currentPiece.y++;
+                if (dir === 'UP') rotatePiece();
+            };
+
+            function checkCollision(offsetX, offsetY, pieceShape = currentPiece.shape) {
+                for (let r = 0; r < pieceShape.length; r++) {
+                    for (let c = 0; c < pieceShape[r].length; c++) {
+                        if (pieceShape[r][c]) {
+                            let newX = currentPiece.x + c + offsetX;
+                            let newY = currentPiece.y + r + offsetY;
+                            if (newX < 0 || newX >= COLS || newY >= ROWS) return true;
+                            if (newY >= 0 && board[newY][newX]) return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            function rotatePiece() {
+                let rotated = currentPiece.shape[0].map((_, i) =>
+                    currentPiece.shape.map(row => row[i]).reverse()
+                );
+                if (!checkCollision(0, 0, rotated)) currentPiece.shape = rotated;
+            }
+
+            function mergePiece() {
+                for (let r = 0; r < currentPiece.shape.length; r++) {
+                    for (let c = 0; c < currentPiece.shape[r].length; c++) {
+                        if (currentPiece.shape[r][c]) {
+                            board[currentPiece.y + r][currentPiece.x + c] = 1;
+                        }
+                    }
+                }
+            }
+
+            function clearLines() {
+                for (let r = ROWS - 1; r >= 0; r--) {
+                    if (board[r].every(val => val === 1)) {
+                        board.splice(r, 1);
+                        board.unshift(Array(COLS).fill(0));
+                        addScore(25);
+                    }
+                }
+            }
+
+            if (gameLoopId) clearInterval(gameLoopId);
+            gameLoopId = setInterval(function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (!checkCollision(0, 1)) {
+                    currentPiece.y++;
+                } else {
+                    mergePiece();
+                    clearLines();
+                    currentPiece = {
+                        shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
+                        x: 3,
+                        y: 0
+                    };
+                    if (checkCollision(0, 0)) {
+                        alert("Oyun Bitti!");
+                        initTetris();
+                        return;
+                    }
+                }
+
+                // Tahtayı Çiz
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        if (board[r][c]) {
+                            ctx.fillStyle = '#38bdf8';
+                            ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+                        }
+                    }
+                }
+
+                // Mevcut Parçayı Çiz
+                ctx.fillStyle = '#22c55e';
+                for (let r = 0; r < currentPiece.shape.length; r++) {
+                    for (let c = 0; c < currentPiece.shape[r].length; c++) {
+                        if (currentPiece.shape[r][c]) {
+                            ctx.fillRect(
+                                (currentPiece.x + c) * BLOCK_SIZE,
+                                (currentPiece.y + r) * BLOCK_SIZE,
+                                BLOCK_SIZE - 1,
+                                BLOCK_SIZE - 1
+                            );
+                        }
+                    }
+                }
+            }, 400);
+        }
+
+        /* ==========================================================================
+           17. OYUN 10: XOX (TIC-TAC-TOE)
+           ========================================================================== */
+        function initTicTacToe() {
+            customGameArea.style.gridTemplateColumns = 'repeat(3, 1fr)';
+            customGameArea.innerHTML = '';
+            let board = ['', '', '', '', '', '', '', '', ''];
+            let turn = 'X';
+
+            const winPatterns = [
+                [0,1,2], [3,4,5], [6,7,8],
+                [0,3,6], [1,4,7], [2,5,8],
+                [0,4,8], [2,4,6]
+            ];
+
+            function checkWin() {
+                return winPatterns.some(pattern => {
+                    return pattern.every(index => board[index] === turn);
+                });
+            }
+
+            board.forEach((val, idx) => {
+                let cell = document.createElement('div');
+                cell.className = 'memory-card';
+                cell.style.fontSize = '2.5rem';
+                cell.innerText = '';
+                cell.onclick = function() {
+                    if (this.innerText === '' && turn === 'X') {
+                        this.innerText = 'X';
+                        board[idx] = 'X';
+                        if (checkWin()) {
+                            addScore(30);
+                            alert("Kazandın!");
+                            initTicTacToe();
+                            return;
+                        }
+                        turn = 'O';
+                        botMove();
+                    }
+                };
+                customGameArea.appendChild(cell);
+            });
+
+            function botMove() {
+                let emptyIndices = board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+                if (emptyIndices.length > 0) {
+                    let move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+                    board[move] = 'O';
+                    customGameArea.children[move].innerText = 'O';
+                    if (checkWin()) {
+                        alert("Bot Kazandı!");
+                        initTicTacToe();
+                        return;
+                    }
+                    turn = 'X';
+                }
+            }
+        }
+
+        /* ==========================================================================
+           18. OYUN 11: SIMON SAYS (HAFIZA DİZİLİMİ)
+           ========================================================================== */
+        function initSimon() {
+            customGameArea.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            customGameArea.innerHTML = '';
+            
+            let sequence = [];
+            let playerSequence = [];
+            let colors = ['#ef4444', '#22c55e', '#38bdf8', '#f59e0b'];
+            let btns = [];
+
+            colors.forEach((color, i) => {
+                let btn = document.createElement('div');
+                btn.className = 'memory-card';
+                btn.style.backgroundColor = color;
+                btn.onclick = () => handlePlayerClick(i);
+                customGameArea.appendChild(btn);
+                btns.push(btn);
+            });
+
+            function nextRound() {
+                playerSequence = [];
+                sequence.push(Math.floor(Math.random() * 4));
+                playSequence();
+            }
+
+            function playSequence() {
+                let i = 0;
+                let interval = setInterval(() => {
+                    flash(btns[sequence[i]]);
+                    i++;
+                    if (i >= sequence.length) clearInterval(interval);
+                }, 600);
+            }
+
+            function flash(btn) {
+                btn.style.opacity = '0.3';
+                setTimeout(() => btn.style.opacity = '1', 300);
+            }
+
+            function handlePlayerClick(index) {
+                flash(btns[index]);
+                playerSequence.push(index);
+
+                if (playerSequence[playerSequence.length - 1] !== sequence[playerSequence.length - 1]) {
+                    alert("Yanlış Sıralama!");
+                    initSimon();
+                    return;
+                }
+
+                if (playerSequence.length === sequence.length) {
+                    addScore(20);
+                    setTimeout(nextRound, 800);
+                }
+            }
+
+            nextRound();
+        }
+
+        /* ==========================================================================
+           19. OYUN 12: CLICKER (TIKLAMA YAĞMURU)
+           ========================================================================== */
+        function initClicker() {
+            customGameArea.style.gridTemplateColumns = '1fr';
+            customGameArea.innerHTML = '';
+
+            let clicks = 0;
+            let timeLeft = 10;
+
+            let container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.alignItems = 'center';
+            container.style.justifyContent = 'center';
+            container.style.gap = '20px';
+
+            let timerText = document.createElement('h3');
+            timerText.innerText = `Kalan Süre: ${timeLeft}s`;
+
+            let clickBtn = document.createElement('button');
+            clickBtn.className = 'btn-action';
+            clickBtn.style.fontSize = '1.5rem';
+            clickBtn.style.padding = '30px';
+            clickBtn.innerText = 'DOKUN!';
+
+            clickBtn.onclick = () => {
+                clicks++;
+                clickBtn.innerText = `Tıklama: ${clicks}`;
+            };
+
+            container.appendChild(timerText);
+            container.appendChild(clickBtn);
+            customGameArea.appendChild(container);
+
+            let timer = setInterval(() => {
+                timeLeft--;
+                timerText.innerText = `Kalan Süre: ${timeLeft}s`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    addScore(clicks);
+                    alert(`Süre Bitti! Toplam ${clicks} Tıklama Yaptın.`);
+                    initClicker();
+                }
+            }, 1000);
+        }
+
+        /* ==========================================================================
+           20. OYUN 13: YILAN & MERDİVEN (ZAR OYUNU)
+           ========================================================================== */
+        function initSnakesLadders() {
+            customGameArea.style.gridTemplateColumns = '1fr';
+            customGameArea.innerHTML = '';
+
+            let playerPos = 1;
+
+            let wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.gap = '15px';
+
+            let posText = document.createElement('h3');
+            posText.innerText = `Konumun: ${playerPos} / 50`;
+
+            let rollBtn = document.createElement('button');
+            rollBtn.className = 'btn-action';
+            rollBtn.innerText = 'Zar At 🎲';
+
+            let logText = document.createElement('p');
+            logText.style.color = 'var(--text-muted)';
+            logText.style.fontSize = '0.9rem';
+
+            rollBtn.onclick = () => {
+                let dice = Math.floor(Math.random() * 6) + 1;
+                playerPos += dice;
+
+                logText.innerText = `${dice} attın!`;
+
+                // Merdivenler ve Yılanlar
+                if (playerPos === 10) { playerPos = 25; logText.innerText += " Merdivenden tırmandın! (+15)"; }
+                if (playerPos === 20) { playerPos = 35; logText.innerText += " Kestirme yol! (+15)"; }
+                if (playerPos === 42) { playerPos = 12; logText.innerText += " Yılan ısırdı! (-30)"; }
+
+                if (playerPos >= 50) {
+                    addScore(50);
+                    alert("Tebrikler, Finise Ulaştın!");
+                    initSnakesLadders();
+                    return;
+                }
+
+                posText.innerText = `Konumun: ${playerPos} / 50`;
+            };
+
+            wrapper.appendChild(posText);
+            wrapper.appendChild(rollBtn);
+            wrapper.appendChild(logText);
+            customGameArea.appendChild(wrapper);
+        }
+        /* ==========================================================================
+           21. OYUN 14: MAYIN TARLASI (MINESWEEPER)
+           ========================================================================== */
+        function initMinesweeper() {
+            customGameArea.style.gridTemplateColumns = 'repeat(4, 1fr)';
+            customGameArea.innerHTML = '';
+            
+            let grid = [];
+            let mineCount = 3;
+            let revealedCount = 0;
+
+            for (let i = 0; i < 16; i++) {
+                grid.push({ isMine: false, revealed: false });
+            }
+
+            // Mayınları rastgele yerleştir
+            let placed = 0;
+            while (placed < mineCount) {
+                let idx = Math.floor(Math.random() * 16);
+                if (!grid[idx].isMine) {
+                    grid[idx].isMine = true;
+                    placed++;
+                }
+            }
+
+            grid.forEach((cellData, index) => {
+                let cell = document.createElement('div');
+                cell.className = 'memory-card';
+                cell.innerText = '❓';
+                
+                cell.onclick = function() {
+                    if (cellData.revealed) return;
+                    cellData.revealed = true;
+
+                    if (cellData.isMine) {
+                        cell.innerText = '💣';
+                        cell.style.backgroundColor = 'var(--danger-color)';
+                        alert('Mayına bastın! Game Over.');
+                        initMinesweeper();
+                    } else {
+                        cell.innerText = '🛡️';
+                        cell.style.backgroundColor = 'var(--bg-card)';
+                        revealedCount++;
+                        addScore(10);
+
+                        if (revealedCount === 16 - mineCount) {
+                            alert('Tebrikler! Tüm mayınlardan kaçındın.');
+                            addScore(50);
+                            initMinesweeper();
+                        }
+                    }
+                };
+                customGameArea.appendChild(cell);
+            });
+        }
+
+        /* ==========================================================================
+           22. OYUN 15: TAŞ KAĞIT MAKAS (RPS)
+           ========================================================================== */
+        function initRPS() {
+            customGameArea.style.gridTemplateColumns = '1fr';
+            customGameArea.innerHTML = '';
+
+            let wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.gap = '15px';
+
+            let statusText = document.createElement('h3');
+            statusText.innerText = 'Seçimini Yap!';
+
+            let btnGroup = document.createElement('div');
+            btnGroup.style.display = 'flex';
+            btnGroup.style.gap = '10px';
+
+            const choices = ['🪨', '📄', '✂️'];
+            const names = ['Taş', 'Kağıt', 'Makas'];
+
+            choices.forEach((choice, i) => {
+                let btn = document.createElement('button');
+                btn.className = 'btn-action';
+                btn.style.fontSize = '1.5rem';
+                btn.style.padding = '12px 20px';
+                btn.innerText = choice;
+
+                btn.onclick = () => playRPS(i);
+                btnGroup.appendChild(btn);
+            });
+
+            wrapper.appendChild(statusText);
+            wrapper.appendChild(btnGroup);
+            customGameArea.appendChild(wrapper);
+
+            function playRPS(playerChoice) {
+                let botChoice = Math.floor(Math.random() * 3);
+                let result = '';
+
+                if (playerChoice === botChoice) {
+                    result = `Berabere! İki taraf da ${choices[playerChoice]} seçti.`;
+                } else if (
+                    (playerChoice === 0 && botChoice === 2) ||
+                    (playerChoice === 1 && botChoice === 0) ||
+                    (playerChoice === 2 && botChoice === 1)
+                ) {
+                    result = `Kazandın! ${choices[playerChoice]} vs ${choices[botChoice]}`;
+                    addScore(15);
+                } else {
+                    result = `Kaybettin! ${choices[playerChoice]} vs ${choices[botChoice]}`;
+                }
+
+                statusText.innerText = result;
+            }
+        }
+
+        /* ==========================================================================
+           23. OYUN 16: KÖSTEBEK VURMA (WHACK-A-MOLE)
+           ========================================================================== */
+        function initWhackAMole() {
+            customGameArea.style.gridTemplateColumns = 'repeat(3, 1fr)';
+            customGameArea.innerHTML = '';
+
+            let holes = [];
+            let activeMole = -1;
+
+            for (let i = 0; i < 9; i++) {
+                let hole = document.createElement('div');
+                hole.className = 'memory-card';
+                hole.innerText = '🕳️';
+
+                hole.onclick = function() {
+                    if (i === activeMole) {
+                        addScore(10);
+                        hole.innerText = '💥';
+                        activeMole = -1;
+                    }
+                };
+
+                customGameArea.appendChild(hole);
+                holes.push(hole);
+            }
+
+            if (gameLoopId) clearInterval(gameLoopId);
+            gameLoopId = setInterval(() => {
+                holes.forEach(h => h.innerText = '🕳️');
+                activeMole = Math.floor(Math.random() * 9);
+                holes[activeMole].innerText = '🐹';
+            }, 800);
+        }
+
+        /* ==========================================================================
+           24. OYUN 17: RENK YAKALAMA (COLOR MATCH)
+           ========================================================================== */
+        function initColorMatch() {
+            customGameArea.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            customGameArea.innerHTML = '';
+
+            const colorList = ['#ef4444', '#22c55e', '#38bdf8', '#f59e0b'];
+            let targetColor = colorList[Math.floor(Math.random() * colorList.length)];
+
+            let title = document.createElement('h3');
+            title.style.gridColumn = 'span 2';
+            title.style.textAlign = 'center';
+            title.innerText = 'Farklı Olan / Hedef Rengi Bul!';
+
+            customGameArea.appendChild(title);
+
+            colorList.forEach(color => {
+                let box = document.createElement('div');
+                box.className = 'memory-card';
+                box.style.backgroundColor = color;
+                
+                box.onclick = () => {
+                    if (color === targetColor) {
+                        addScore(15);
+                        initColorMatch();
+                    } else {
+                        alert('Yanlış Renk!');
+                        initColorMatch();
+                    }
+                };
+                customGameArea.appendChild(box);
+            });
+        }
+
+        /* ==========================================================================
+           25. OYUN 18: HIZLI MATEMATİK (MATH QUIZ)
+           ========================================================================== */
+        function initMathQuiz() {
+            customGameArea.style.gridTemplateColumns = '1fr';
+            customGameArea.innerHTML = '';
+
+            let n1 = Math.floor(Math.random() * 20) + 1;
+            let n2 = Math.floor(Math.random() * 20) + 1;
+            let correctAnswer = n1 + n2;
+
+            let container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.alignItems = 'center';
+            container.style.gap = '15px';
+
+            let question = document.createElement('h2');
+            question.innerText = `${n1} + ${n2} = ?`;
+
+            let optionsDiv = document.createElement('div');
+            optionsDiv.style.display = 'grid';
+            optionsDiv.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            optionsDiv.style.gap = '10px';
+
+            let options = [correctAnswer, correctAnswer + 2, correctAnswer - 1, correctAnswer + 5];
+            options.sort(() => Math.random() - 0.5);
+
+            options.forEach(opt => {
+                let btn = document.createElement('button');
+                btn.className = 'btn-action';
+                btn.style.padding = '15px';
+                btn.innerText = opt;
+
+                btn.onclick = () => {
+                    if (opt === correctAnswer) {
+                        addScore(20);
+                        initMathQuiz();
+                    } else {
+                        alert('Yanlış Cevap!');
+                        initMathQuiz();
+                    }
+                };
+                optionsDiv.appendChild(btn);
+            });
+
+            container.appendChild(question);
+            container.appendChild(optionsDiv);
+            customGameArea.appendChild(container);
+        }
